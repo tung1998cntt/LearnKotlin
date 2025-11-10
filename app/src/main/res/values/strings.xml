@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">LearnKotlin</string>
+    <string name="transfer_in_progress">Transfer in progress...</string>
+</resources>
