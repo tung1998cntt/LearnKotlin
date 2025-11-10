@@ -27,4 +27,8 @@ open class BaseViewModel : ViewModel() {
             }
         }
     }
+    /*
+    *
+    * Xin chao
+    * */
 }
