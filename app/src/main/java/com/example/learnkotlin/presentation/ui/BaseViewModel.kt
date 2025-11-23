@@ -1,5 +1,5 @@
+package com.example.learnkotlin.presentation.ui
 
-package com.example.learnkotlin
 import UiState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,7 +7,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
 
 open class BaseViewModel : ViewModel() {
 

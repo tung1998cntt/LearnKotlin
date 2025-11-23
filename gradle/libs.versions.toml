@@ -41,6 +41,7 @@ dagger-hilt-android = { module = "com.google.dagger:hilt-android", version.ref =
 dagger-hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
+lottie = "com.airbnb.android:lottie:6.7.1"
 
 
 [plugins]
@@ -49,4 +50,5 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 realm-kotlin = { id = "io.realm.kotlin", version.ref = "realm" }
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt"}
+kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize" }
 
