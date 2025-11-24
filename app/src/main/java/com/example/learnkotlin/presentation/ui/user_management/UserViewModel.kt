@@ -1,31 +1,56 @@
 package com.example.learnkotlin.presentation.ui.user_management
 
+import com.example.learnkotlin.domain.model.User
+import com.example.learnkotlin.domain.usecase.UserUseCase
 import com.example.learnkotlin.presentation.base.BaseViewModel
-import kotlinx.coroutines.delay
+import com.example.learnkotlin.domain.base.Command
+import com.example.learnkotlin.presentation.base.UiEvent
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 
-class UserViewModel : BaseViewModel() {
+class UserViewModel : BaseViewModel(), KoinComponent {
 
-    override suspend fun handleCommand(command: Any) {
+
+    override fun handleCommand(command: Command) {
         when (command) {
-            is UserCommand.LoadUser -> {
-                sendEvent(UserEvent.ShowLoading)
-                delay(1000) // giả lập network
-                updateStateSuccess("User name: John Doe, id=${command.id}")
-                sendEvent(UserEvent.ShowUser("John Doe"))
-            }
-
-            is UserCommand.RefreshUser -> {
-                sendEvent(UserEvent.ShowLoading)
-                delay(500)
-                updateStateSuccess("User refreshed!")
-            }
-            is UserCommand.GoToDetail -> {
-
-            }
-
-            else -> {
-                sendEvent(UserEvent.ShowError("Unknown command"))
-            }
+            is UserCommand.LoadUsers -> loadUsers()
+            is UserCommand.AddUser -> addUser(command)
+            else -> Unit
         }
     }
+
+    private fun addUser(command: UserCommand.AddUser) {
+        launchWithLoading(
+            showLoading = false, // ví dụ không hiển thị loading
+            block = {
+                val useCase: UserUseCase = get()
+                command.name?.let { useCase.addUser(it) }
+            },
+            onResult = { user ->
+                sendEvent(UserEvent.ShowUser(user as User?))
+            },
+            onError = { e ->
+                handleError(e)
+                sendEvent(UiEvent.Error("Add user failed: ${e.message}", e))
+            }
+        )
+    }
+
+    private fun loadUsers() {
+        launchWithLoading(
+            showLoading = true,  // có thể đặt false nếu không muốn loading
+            block = {
+                val useCase: UserUseCase = get()
+                useCase.loadUsers()
+            },
+            onResult = { users ->
+                sendEvent(UserEvent.ShowUser(users as User?))
+            },
+            onError = { e ->
+                sendEvent(UiEvent.Error("Load users failed: ${e.message}", e))
+            }
+        )
+    }
 }
+
+

@@ -1,21 +1,20 @@
 package com.example.learnkotlin.presentation.base
 
-import android.content.Intent
 import android.os.Bundle
-import android.os.Parcelable
+import android.util.Log
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import androidx.viewbinding.ViewBinding
 import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieDrawable
 import com.example.learnkotlin.R
-import com.example.learnkotlin.extensions.parcelable
+import com.example.learnkotlin.domain.base.Command
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -41,72 +40,29 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
         _binding = inflateBinding()
         initWindowInsets()
         initLottieLoading()
-        observeState()
         observeEvents()
         viewModel.onInit()
         onInit()
     }
 
-    private fun initWindowInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
-    }
-
-    private fun initLottieLoading() {
-        lottieLoading = LottieAnimationView(requireContext()).apply {
-            layoutParams = FrameLayout.LayoutParams(200, 200).apply { gravity = Gravity.CENTER }
-            setAnimation(R.raw.animation_loading)
-            repeatCount = LottieDrawable.INFINITE
-            visibility = View.GONE
-        }
-        (binding.root as? FrameLayout)?.addView(lottieLoading)
-    }
-
-    private fun observeState() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.state.collectLatest { state ->
-                when (state) {
-                    is BaseUiState.Loading -> showLoading()
-                    is BaseUiState.Success -> hideLoading()
-                    is BaseUiState.Error -> hideLoading()
-                    is BaseUiState.Empty -> hideLoading()
-                }
-            }
-        }
-    }
-
     private fun observeEvents() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.events.collectLatest { event ->
-                handleEvent(event)
-            }
-        }
-        lifecycleScope.launch {
-            viewModel.commands.collect { command ->
-                when (command) {
-                    is NavigationRoute.ToActivity<*> -> {
-                        val intent = Intent(requireContext(), command.clazz)
-                        if (command.data is Parcelable) intent.putExtra("data", command.data)
-                        startActivity(intent)
-                    }
-                    is NavigationRoute.ToFragment<*> -> {
-                        command.fragment.arguments = Bundle().apply {
-                            if (command.data is Parcelable) putParcelable("data", command.data)
-                        }
-                        parentFragmentManager.commit {
-                            replace(command.containerId, command.fragment)
-                            if (command.addToBackStack) addToBackStack(null)
-                        }
+                when (event) {
+                    UiEvent.Loading -> showLoading()
+                    UiEvent.HideLoading -> hideLoading()
+                    is UiEvent.Error -> {
+                        hideLoading()
+                        handleError(event.message)
                     }
                 }
             }
         }
     }
+    protected open fun handleError(message: String?) = handleEvent(UiEvent.Error(message))
 
-    protected fun sendCommand(command: Any) {
+
+    protected fun sendCommand(command: Command) {
         viewModel.sendCommand(command)
     }
 
@@ -124,13 +80,32 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
         }
     }
 
-
-    protected inline fun <reified T : Parcelable> getNavData(): T? {
-        return arguments?.parcelable("data", T::class.java)
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun initWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+    }
+
+    private fun initLottieLoading() {
+        lottieLoading = LottieAnimationView(requireContext()).apply {
+            layoutParams = FrameLayout.LayoutParams(200, 200).apply { gravity = Gravity.CENTER }
+            setAnimation(R.raw.animation_loading)
+            repeatCount = LottieDrawable.INFINITE
+            visibility = View.GONE
+        }
+
+        val rootView = binding.root
+        if (rootView is ViewGroup) {
+            rootView.addView(lottieLoading)
+        } else {
+            Log.w("BaseActivity", "Root view is not a ViewGroup, cannot add Lottie")
+        }
     }
 }

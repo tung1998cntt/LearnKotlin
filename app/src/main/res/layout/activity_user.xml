@@ -19,15 +19,29 @@
 
         />
 
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnUserNext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dimen_8dp"
+        android:background="@color/color_0006FF"
+        android:text="@string/continue_title"
+        android:textColor="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnUserConfirm"
+
+        />
+
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tvUserContent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dimen_8dp"
         android:textSize="@dimen/dimen_24sp"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="@dimen/dimen_8dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnUserConfirm"
+        app:layout_constraintTop_toBottomOf="@id/btnUserNext"
         tools:text="Xin chào mọi người" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
