@@ -1,7 +1,7 @@
 package com.example.learnkotlin.presentation.base
 
 import com.example.learnkotlin.domain.base.Command
-import com.example.learnkotlin.presentation.model.NavData
+import com.example.learnkotlin.presentation.base.NavData
 
 
 sealed class NavigationCommand: Command {

@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.learnkotlin.domain.base.Command
 import com.example.learnkotlin.domain.base.Event
-import com.example.learnkotlin.presentation.model.NavData
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

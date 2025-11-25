@@ -9,6 +9,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -18,10 +19,8 @@ import androidx.viewbinding.ViewBinding
 import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieDrawable
 import com.example.learnkotlin.R
-import com.example.learnkotlin.Tags
 import com.example.learnkotlin.domain.base.Command
-import com.example.learnkotlin.presentation.model.NavData
-import kotlinx.coroutines.flow.collectLatest
+import com.example.learnkotlin.domain.base.Event
 import kotlinx.coroutines.launch
 
 abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
@@ -32,13 +31,16 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
     private val launcherMap =
         mutableMapOf<Int, androidx.activity.result.ActivityResultLauncher<Intent>>()
 
+    private lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
+    private var pendingResultCallback: ((NavData?) -> Unit)? = null
+
     protected var navData: NavData? = null
 
     /** Subclass cung cấp inflate binding */
     abstract fun inflateBinding(): VB
 
     /** Subclass xử lý event (toast, navigate…) */
-    abstract fun handleEvent(event: UiEvent)
+    abstract fun handleEvent(event: Event)
 
     /** Subclass gửi command khởi tạo UI */
     abstract fun onInit()
@@ -51,6 +53,7 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
         setContentView(binding.root)
         initWindowInsets()
         initLottieLoading()
+        registerActivityResultLauncher()
         viewModel.onInit()
         navData = getNavDataParcelable()
         navData?.let { viewModel.sendCommand(InitDataCommand(it)) }
@@ -62,20 +65,15 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
     /** Collect tất cả event từ ViewModel */
     private fun observeEvents() {
         lifecycleScope.launch {
-            viewModel.events.collectLatest { event ->
+            viewModel.events.collect { event ->
                 when (event) {
                     is UiEvent.Loading -> showLoading()
                     is UiEvent.HideLoading -> hideLoading()
-                    is UiEvent.Error -> {
-                        hideLoading()
-                        handleError(event.message)
-                    }
+                    else -> handleEvent(event)
                 }
             }
         }
     }
-
-    protected open fun handleError(message: String?) = handleEvent(UiEvent.Error(message))
 
     protected fun sendCommand(command: Command) {
         viewModel.sendCommand(command)
@@ -104,20 +102,30 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
     }
 
     private fun initLottieLoading() {
+        // Tạo Lottie AnimationView
         lottieLoading = LottieAnimationView(this).apply {
-            layoutParams = FrameLayout.LayoutParams(200, 200).apply { gravity = Gravity.CENTER }
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = Gravity.CENTER
+            }
             setAnimation(R.raw.animation_loading)
             repeatCount = LottieDrawable.INFINITE
             visibility = View.GONE
         }
 
-        val rootView = binding.root
-        if (rootView is ViewGroup) {
+        // Lấy root view của activity
+        val rootView = findViewById<ViewGroup>(android.R.id.content)
+
+        // Nếu rootView là FrameLayout hoặc ViewGroup, add Lottie vào
+        if (rootView != null) {
             rootView.addView(lottieLoading)
         } else {
             Log.w("BaseActivity", "Root view is not a ViewGroup, cannot add Lottie")
         }
     }
+
 
     protected inline fun <reified T : Parcelable> getNavDataParcelable(): T? {
         return if (Build.VERSION.SDK_INT >= 33) {
@@ -129,6 +137,16 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
     }
 
 
+    private fun registerActivityResultLauncher() {
+        activityResultLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            val resultData = result.data?.getParcelableExtra<NavData>("data")
+            pendingResultCallback?.invoke(resultData)
+            pendingResultCallback = null
+        }
+    }
+
     protected fun <T : NavData> startActivity(
         clazz: Class<*>,
         data: T? = null,
@@ -137,13 +155,8 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
         val intent = Intent(this, clazz)
         data?.let { intent.putExtra("data", it) }
 
-        val launcher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                val resultData = result.data?.getParcelableExtra<NavData>("data")
-                onResult?.invoke(resultData)
-            }
-        launcher.launch(intent)
+        pendingResultCallback = onResult
+        activityResultLauncher.launch(intent)
     }
-
 
 }

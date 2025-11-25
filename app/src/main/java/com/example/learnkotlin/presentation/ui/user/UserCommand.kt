@@ -1,4 +1,4 @@
-package com.example.learnkotlin.presentation.ui.user_management
+package com.example.learnkotlin.presentation.ui.user
 
 import com.example.learnkotlin.domain.base.Command
 

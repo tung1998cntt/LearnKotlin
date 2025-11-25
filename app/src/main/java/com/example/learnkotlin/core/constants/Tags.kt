@@ -1,4 +1,4 @@
-package com.example.learnkotlin
+package com.example.learnkotlin.core.constants
 
 object Tags {
     const val TUNG = "tung1998"

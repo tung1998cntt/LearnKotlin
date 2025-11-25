@@ -1,4 +1,4 @@
-package com.example.learnkotlin.presentation.ui.user_management
+package com.example.learnkotlin.presentation.ui.user
 
 import com.example.learnkotlin.databinding.FragmentUserBinding
 import com.example.learnkotlin.presentation.base.BaseFragment
@@ -12,12 +12,12 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
         FragmentUserBinding.inflate(layoutInflater)
 
     override fun onInit() {
-        sendCommand(UserCommand.LoadUser(1))
+        sendCommand(UserCommand.AddUser("Ok bạn"))
     }
 
     override fun handleEvent(event: Any) {
         when (event) {
-            is UserEvent.ShowUser -> binding.tvUserContent.text = event.name
+            is UserEvent.ShowUser -> binding.tvUserContent.text = event.user.toString()
             is UserEvent.ShowError -> { /* handle error */
             }
             else -> {/* To do*/}

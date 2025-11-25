@@ -1,4 +1,4 @@
-package com.example.learnkotlin.domain.model
+package com.example.learnkotlin.domain.model.user
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

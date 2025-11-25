@@ -1,15 +1,17 @@
-package com.example.learnkotlin
+package com.example.learnkotlin.data
 
+import com.example.learnkotlin.data.model.AppLanguage
+import com.example.learnkotlin.core.secure.SecureSharedPrefs
 import java.util.Locale
 
 class AppData private constructor() {
 
-    private val prefs: BaseSharedPreferences by lazy { BaseSharedPreferences("app_data_prefs") }
+    private val prefs by lazy { SecureSharedPrefs.get() }
 
     var language: AppLanguage
         get() {
             val code = prefs.getString("key_language", AppLanguage.VIETNAMESE.code)
-            return if (code.isNullOrEmpty()) AppLanguage.ENGLISH else AppLanguage.fromCode(code)
+            return AppLanguage.Companion.fromCode(code)
         }
         set(value) {
             prefs.putString("key_language", value.code)

@@ -1,4 +1,4 @@
-package com.example.learnkotlin.presentation.model
+package com.example.learnkotlin.presentation.base
 
 import android.os.Parcelable
 

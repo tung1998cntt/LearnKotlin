@@ -1,5 +1,6 @@
-package com.example.learnkotlin.presentation.model
+package com.example.learnkotlin.presentation.model.user
 
+import com.example.learnkotlin.presentation.base.NavData
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
