@@ -23,7 +23,11 @@ class UserViewModel : BaseViewModel(), KoinComponent {
             showLoading = true,
             block = {
                 val useCase: UserUseCase = get()
-                useCase.loadUsers()
+                val result = useCase.loadUsers() // trả ApiResult
+                when (result) {
+                    is ApiResult.Success -> sendEvent(UserEvent.ShowUser(result.data))
+                    is ApiResult.Error -> throw ApiException.ServerError(result.message ?: "Unknown") // ném lỗi để launchWithLoading catch
+                }
             },
             onResult = { users ->
                 sendEvent(UserEvent.ShowUser(users as? List<User>))

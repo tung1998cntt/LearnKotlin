@@ -79,4 +79,10 @@ dependencies {
     implementation(libs.koin.android)
     implementation(libs.lottie)
 
+    implementation(libs.gson)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.okhttp)
+    implementation(libs.logging.interceptor)
+
 }

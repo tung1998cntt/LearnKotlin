@@ -2,6 +2,8 @@ package com.example.learnkotlin.presentation.base
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.learnkotlin.core.network.ApiException
+import com.example.learnkotlin.domain.base.BaseError
 import com.example.learnkotlin.domain.base.Command
 import com.example.learnkotlin.domain.base.Event
 import kotlinx.coroutines.CoroutineDispatcher
@@ -90,21 +92,38 @@ abstract class BaseViewModel : ViewModel() {
     protected fun launchWithLoading(
         dispatcher: CoroutineDispatcher = Dispatchers.IO,
         showLoading: Boolean = true,
-        block: suspend CoroutineScope.() -> Any?,
-        onResult: (result: Any?) -> Unit,
-        onError: (Exception) -> Unit = { handleError(it) }
+        block: suspend CoroutineScope.() -> Unit,
+        customErrorHandler: ((BaseError) -> Unit)? = null
     ) {
         workerScope.launch {
             try {
                 if (showLoading) showLoading()
-                val result = withContext(dispatcher) { block() }
-                onResult(result)
+                withContext(dispatcher) { block() }
             } catch (e: Exception) {
-                onError(e)
+                // Map exception thành BaseError
+                val error = when (e) {
+                    is ApiException.NetworkError -> BaseError.NetworkError(e.message)
+                    is ApiException.Unauthorized -> BaseError.Unauthorized(e.message)
+                    is ApiException.Forbidden -> BaseError.Forbidden(e.message)
+                    is ApiException.ServerError -> BaseError.ServerError(e.message, e.code)
+                    else -> BaseError.UnknownError(e.message)
+                }
+
+                // Xử lý custom nếu có, không thì xử lý chung
+                customErrorHandler?.invoke(error) ?: handleBaseError(error)
             } finally {
                 if (showLoading) hideLoading()
             }
         }
+    }
+
+
+    protected open fun handleBaseError(error: BaseError) {
+//        when (error) {
+//            is BaseError.NetworkError -> sendEvent(UiEvent.ShowToast("No connection"))
+//            is BaseError.ServerError -> sendEvent(UiEvent.ShowToast("Server error, try again"))
+//            is BaseError.Unauthorized -> sendEvent(UiEvent.Logout)
+//            else -> sendEvent(UiEvent.ShowToast(error.message ?: "Unknown error"))
     }
 
 

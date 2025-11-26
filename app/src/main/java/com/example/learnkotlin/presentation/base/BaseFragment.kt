@@ -1,11 +1,14 @@
 package com.example.learnkotlin.presentation.base
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -20,6 +23,9 @@ import kotlinx.coroutines.launch
 
 abstract class BaseFragment<VB : ViewBinding> : Fragment() {
 
+
+    private var pendingResultCallback: ((NavData?) -> Unit)? = null
+    private lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
     protected var _binding: VB? = null
     protected val binding get() = _binding!!
     protected abstract val viewModel: BaseViewModel
@@ -40,9 +46,21 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
         _binding = inflateBinding()
         initWindowInsets()
         initLottieLoading()
-        observeEvents()
+        registerActivityResultLauncher()
         viewModel.onInit()
+        observeEvents()
         onInit()
+    }
+
+
+    private fun registerActivityResultLauncher() {
+        activityResultLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            val resultData = result.data?.getParcelableExtra<NavData>("data")
+            pendingResultCallback?.invoke(resultData)
+            pendingResultCallback = null
+        }
     }
 
     private fun observeEvents() {
@@ -59,6 +77,42 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
             }
         }
     }
+
+    /** Start Activity từ Fragment chuẩn */
+    protected fun <T : NavData> startActivity(
+        clazz: Class<*>,
+        data: T? = null,
+        onResult: ((NavData?) -> Unit)? = null
+    ) {
+        val intent = Intent(requireContext(), clazz)
+        data?.let { intent.putExtra("data", it) }
+        pendingResultCallback = onResult
+        activityResultLauncher.launch(intent)
+    }
+
+    protected fun startFragment(
+        containerId: Int,
+        fragment: Fragment,
+        addToBackStack: Boolean = true,
+        replace: Boolean = true,
+        tag: String? = null,
+        enterAnim: Int? = null,
+        exitAnim: Int? = null
+    ) {
+        val fm = parentFragmentManager
+        val transaction = fm.beginTransaction()
+
+        if (enterAnim != null && exitAnim != null) {
+            transaction.setCustomAnimations(enterAnim, exitAnim, enterAnim, exitAnim)
+        }
+
+        if (replace) transaction.replace(containerId, fragment, tag)
+        else transaction.add(containerId, fragment, tag)
+
+        if (addToBackStack) transaction.addToBackStack(tag)
+        transaction.commit()
+    }
+
     protected open fun handleError(message: String?) = handleEvent(UiEvent.Error(message))
 
 
@@ -94,15 +148,24 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
     }
 
     private fun initLottieLoading() {
+        // Tạo Lottie AnimationView
         lottieLoading = LottieAnimationView(requireContext()).apply {
-            layoutParams = FrameLayout.LayoutParams(200, 200).apply { gravity = Gravity.CENTER }
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = Gravity.CENTER
+            }
             setAnimation(R.raw.animation_loading)
             repeatCount = LottieDrawable.INFINITE
             visibility = View.GONE
         }
 
-        val rootView = binding.root
-        if (rootView is ViewGroup) {
+        // Lấy root view của activity
+        val rootView = requireActivity().findViewById<ViewGroup>(android.R.id.content)
+
+        // Nếu rootView là FrameLayout hoặc ViewGroup, add Lottie vào
+        if (rootView != null) {
             rootView.addView(lottieLoading)
         } else {
             Log.w("BaseActivity", "Root view is not a ViewGroup, cannot add Lottie")

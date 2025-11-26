@@ -14,6 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.viewbinding.ViewBinding
 import com.airbnb.lottie.LottieAnimationView
@@ -157,6 +158,32 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
 
         pendingResultCallback = onResult
         activityResultLauncher.launch(intent)
+    }
+
+    protected fun startFragment(
+        containerId: Int,
+        fragment: Fragment,
+        addToBackStack: Boolean = true,
+        replace: Boolean = true,
+        tag: String? = null,
+        enterAnim: Int? = null,
+        exitAnim: Int? = null
+    ) {
+        val transaction = supportFragmentManager.beginTransaction()
+
+        // Animation nếu có
+        if (enterAnim != null && exitAnim != null) {
+            transaction.setCustomAnimations(enterAnim, exitAnim, enterAnim, exitAnim)
+        }
+
+        if (replace) {
+            transaction.replace(containerId, fragment, tag)
+        } else {
+            transaction.add(containerId, fragment, tag)
+        }
+
+        if (addToBackStack) transaction.addToBackStack(tag)
+        transaction.commit()
     }
 
 }
