@@ -5,5 +5,5 @@ import com.example.learnkotlin.domain.model.user.User
 
 interface UserRepository {
     suspend fun getUsers(): ApiResult<List<User>>
-    suspend fun addUser(name: String): User
+    suspend fun addUser(name: String): ApiResult<User>
 }

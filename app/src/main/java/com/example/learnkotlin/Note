@@ -1,0 +1,12 @@
+
+#hilt
+@HiltAndroidApp : tạo singleton component
+@AndroidEntryPoint: đánh dấu 1 class cps hilt có tể inject dependency vào đó
+- Các class có thể dùng @AndroidEntryPoint:
+Activity
+Fragment
+View (Custom View)
+Service
+BroadcastReceiver
+ViewModel (khác với @HiltViewModel)
+- @Provides: Dùng trong Module để cho Hilt biết cách tạo instance của một class hoặc interface mà Hilt không thể tự biết cách tạo, dùng khi class không có @Inject constructor()

@@ -1,15 +1,21 @@
 package com.example.learnkotlin.presentation.ui.user
 
-import com.example.learnkotlin.domain.model.user.User
+import com.example.learnkotlin.core.network.ApiException
+import com.example.learnkotlin.core.network.ApiResult
 import com.example.learnkotlin.domain.usecase.user.UserUseCase
 import com.example.learnkotlin.presentation.base.BaseViewModel
 import com.example.learnkotlin.domain.base.Command
-import com.example.learnkotlin.presentation.base.UiEvent
+import com.example.learnkotlin.domain.repository.user.UserRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
+import javax.inject.Inject
 
-class UserViewModel : BaseViewModel(), KoinComponent {
+@HiltViewModel
+class UserViewModel : BaseViewModel() {
 
+    @Inject
+    lateinit var useCase: UserUseCase
 
     override fun handleCommand(command: Command) {
         when (command) {
@@ -22,19 +28,13 @@ class UserViewModel : BaseViewModel(), KoinComponent {
         launchWithLoading(
             showLoading = true,
             block = {
-                val useCase: UserUseCase = get()
-                val result = useCase.loadUsers() // trả ApiResult
-                when (result) {
+                when (val result = useCase.loadUsers()) { // trả ApiResult
                     is ApiResult.Success -> sendEvent(UserEvent.ShowUser(result.data))
                     is ApiResult.Error -> throw ApiException.ServerError(result.message ?: "Unknown") // ném lỗi để launchWithLoading catch
                 }
             },
-            onResult = { users ->
-                sendEvent(UserEvent.ShowUser(users as? List<User>))
-                sendEvent(UserEvent.ShowAlert)
-            },
-            onError = { e ->
-                sendEvent(UiEvent.Error("Load users failed: ${e.message}", e))
+            customErrorHandler = {
+
             }
         )
     }

@@ -6,16 +6,17 @@ import com.example.learnkotlin.core.network.ApiService
 import com.example.learnkotlin.domain.model.user.User
 import com.example.learnkotlin.domain.repository.user.UserRepository
 import kotlinx.coroutines.delay
+import javax.inject.Inject
 
-class UserRepositoryImpl(private val apiService: ApiService) : UserRepository {
-
-
+class UserRepositoryImpl @Inject constructor() : UserRepository {
+    @Inject
+    private lateinit var apiService: ApiService
     override suspend fun getUsers(): ApiResult<List<User>> {
         delay(3000)
         return safeApiCall { apiService.getUsers() }
     }
 
-    override suspend fun addUser(name: String): User {
+    override suspend fun addUser(name: String): ApiResult<User> {
         delay(3000)
         val list = mutableListOf<User>()
         val user = User(id = 0 + 1, name = name)

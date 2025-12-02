@@ -67,13 +67,16 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     kapt(libs.androidx.room.compiler)
 
-    // 🧱 Realm Kotlin SDK
+    //  Realm Kotlin SDK
     implementation(libs.realm.kotlin)
 
     // (tuỳ chọn) Hilt DI
     implementation(libs.dagger.hilt.android)
     kapt(libs.dagger.hilt.compiler)
 
+    // Hilt + Jetpack Compose Navigation
+    implementation(libs.hilt.work)
+    implementation(libs.hilt.navigation.compose)
 
     implementation(libs.koin.core)
     implementation(libs.koin.android)

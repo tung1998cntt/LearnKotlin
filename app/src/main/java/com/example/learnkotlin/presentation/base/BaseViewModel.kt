@@ -108,9 +108,12 @@ abstract class BaseViewModel : ViewModel() {
                     is ApiException.ServerError -> BaseError.ServerError(e.message, e.code)
                     else -> BaseError.UnknownError(e.message)
                 }
-
-                // Xử lý custom nếu có, không thì xử lý chung
-                customErrorHandler?.invoke(error) ?: handleBaseError(error)
+                if (customErrorHandler != null) {
+                    customErrorHandler.invoke(error)
+                } else {
+                    // ⚠ Không custom → dùng handler chung
+                    handleBaseError(error)
+                }
             } finally {
                 if (showLoading) hideLoading()
             }
@@ -119,6 +122,7 @@ abstract class BaseViewModel : ViewModel() {
 
 
     protected open fun handleBaseError(error: BaseError) {
+        /* Lỗi chung nhé*/
 //        when (error) {
 //            is BaseError.NetworkError -> sendEvent(UiEvent.ShowToast("No connection"))
 //            is BaseError.ServerError -> sendEvent(UiEvent.ShowToast("Server error, try again"))

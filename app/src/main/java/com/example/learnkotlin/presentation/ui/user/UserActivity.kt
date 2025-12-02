@@ -1,15 +1,17 @@
 package com.example.learnkotlin.presentation.ui.user
 
+import androidx.activity.viewModels
 import com.example.learnkotlin.databinding.ActivityUserBinding
 import com.example.learnkotlin.domain.base.Event
 import com.example.learnkotlin.presentation.base.BaseActivity
 import com.example.learnkotlin.presentation.model.user.ProductNavData
 import com.google.android.material.snackbar.Snackbar
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class UserActivity : BaseActivity<ActivityUserBinding>() {
 
-    override val viewModel: UserViewModel by viewModel()
+    override val viewModel: UserViewModel by viewModels()
 
     override fun inflateBinding(): ActivityUserBinding =
         ActivityUserBinding.inflate(layoutInflater)

@@ -4,10 +4,12 @@ import android.app.Application
 import android.content.Context
 import android.content.res.Configuration
 import com.example.learnkotlin.di.appModule
+import dagger.hilt.android.HiltAndroidApp
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import java.util.Locale
 
+@HiltAndroidApp   /* Tạo singleton Component*/
 class MyApp: Application() {
 
     override fun onCreate() {
