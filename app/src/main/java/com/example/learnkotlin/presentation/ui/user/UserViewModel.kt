@@ -5,17 +5,14 @@ import com.example.learnkotlin.core.network.ApiResult
 import com.example.learnkotlin.domain.usecase.user.UserUseCase
 import com.example.learnkotlin.presentation.base.BaseViewModel
 import com.example.learnkotlin.domain.base.Command
-import com.example.learnkotlin.domain.repository.user.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.get
 import javax.inject.Inject
 
 @HiltViewModel
-class UserViewModel : BaseViewModel() {
+class UserViewModel @Inject constructor(
+    private val useCase: UserUseCase
 
-    @Inject
-    lateinit var useCase: UserUseCase
+)   : BaseViewModel() {
 
     override fun handleCommand(command: Command) {
         when (command) {

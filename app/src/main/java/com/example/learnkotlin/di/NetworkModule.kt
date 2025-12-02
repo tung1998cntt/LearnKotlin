@@ -19,6 +19,10 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideBaseUrl() = "https://api.example.com/"
+
+    @Provides
+    @Singleton
     fun provideOkHttpClient(): OkHttpClient = OkHttpClient.Builder()
         .addInterceptor {
             val request = it.request().newBuilder()
@@ -38,8 +42,8 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideRetrofit(client: OkHttpClient): Retrofit = Retrofit.Builder()
-        .baseUrl("https://api.example.com/")
+    fun provideRetrofit(client: OkHttpClient, baseUrl: String): Retrofit = Retrofit.Builder()
+        .baseUrl(baseUrl)
         .client(client)
         .addConverterFactory(GsonConverterFactory.create())
         .build()

@@ -11,15 +11,15 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 
-val appModule = module {
-    //single<UserRepository> { UserRepositoryImpl() }
-
-    single { NetworkClient.provideOkHttpClient() }
-    single { NetworkClient.createService<ApiService>(get()) }
-
-
-    factory<UserRepository> { UserRepositoryImpl(get()) }
-    factory { UserUseCase(get()) }
-    viewModel { UserViewModel() }
-    viewModel { UserDetailViewModel() }
-}
+//val appModule = module {
+//    //single<UserRepository> { UserRepositoryImpl() }
+//
+//    single { NetworkClient.provideOkHttpClient() }
+//    single { NetworkClient.createService<ApiService>(get()) }
+//
+//
+//    factory<UserRepository> { UserRepositoryImpl(get()) }
+//    factory { UserUseCase(get()) }
+//    viewModel { UserViewModel() }
+//    viewModel { UserDetailViewModel() }
+//}

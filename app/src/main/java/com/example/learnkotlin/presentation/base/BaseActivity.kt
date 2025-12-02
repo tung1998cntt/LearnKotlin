@@ -22,6 +22,7 @@ import com.airbnb.lottie.LottieDrawable
 import com.example.learnkotlin.R
 import com.example.learnkotlin.domain.base.Command
 import com.example.learnkotlin.domain.base.Event
+import com.example.learnkotlin.presentation.base.dialog.ConfirmDialog
 import kotlinx.coroutines.launch
 
 abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
@@ -70,6 +71,11 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
                 when (event) {
                     is UiEvent.Loading -> showLoading()
                     is UiEvent.HideLoading -> hideLoading()
+                    is DialogEvent.ShowError -> {
+                        showConfirmDialog(title = event.message, onConfirm = {
+
+                        })
+                    }
                     else -> handleEvent(event)
                 }
             }
@@ -184,6 +190,21 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
 
         if (addToBackStack) transaction.addToBackStack(tag)
         transaction.commit()
+    }
+
+    fun showConfirmDialog(
+        title: String? = null,
+        message: String? = null,
+        onConfirm: (() -> Unit)? = null
+    ) {
+        // Kiểm tra nếu activity đang finish hoặc destroyed
+        if (!isFinishing && !isDestroyed) {
+            ConfirmDialog(
+                title = title,
+                message = message,
+                onConfirm = onConfirm
+            ).show(supportFragmentManager, "ConfirmDialog")
+        }
     }
 
 }

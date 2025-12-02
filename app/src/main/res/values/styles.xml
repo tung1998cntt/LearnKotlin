@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="BaseDialogNormal" parent="Theme.MaterialComponents.Light.Dialog">
+        <item name="shapeAppearanceMediumComponent">@style/DialogRounded</item>
+        <item name="android:backgroundDimAmount">0.5</item>
+    </style>
+
+    <style name="BaseDialogFullScreen" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
+    <style name="DialogRounded">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">20dp</item>
+    </style>
+
+
+</resources>

@@ -38,7 +38,7 @@ class BaseCompositeAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         isLoadingMore = false
     }
 
-    fun setLastPage(lastPage: Boolean) {
+    fun setLastPageData(lastPage: Boolean) {
         isLastPage = lastPage
     }
 

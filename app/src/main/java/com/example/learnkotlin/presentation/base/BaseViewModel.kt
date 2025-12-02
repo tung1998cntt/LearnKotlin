@@ -102,14 +102,21 @@ abstract class BaseViewModel : ViewModel() {
             } catch (e: Exception) {
                 // Map exception thành BaseError
                 val error = when (e) {
-                    is ApiException.NetworkError -> BaseError.NetworkError(e.message)
+                    is ApiException.NetworkError -> BaseError.NetworkError("network error")
                     is ApiException.Unauthorized -> BaseError.Unauthorized(e.message)
                     is ApiException.Forbidden -> BaseError.Forbidden(e.message)
+                    is ApiException.NotFound -> BaseError.NotFound(e.message)
                     is ApiException.ServerError -> BaseError.ServerError(e.message, e.code)
                     else -> BaseError.UnknownError(e.message)
                 }
                 if (customErrorHandler != null) {
-                    customErrorHandler.invoke(error)
+                    when (error) {
+                        is BaseError.NetworkError -> sendEvent(DialogEvent.ShowError(error.message))
+                        is BaseError.ServerError -> sendEvent(DialogEvent.ShowError("Server error, try again"))
+                        is BaseError.Unauthorized -> sendEvent(DialogEvent.ShowError(error.message))
+                        is BaseError.Forbidden -> sendEvent(DialogEvent.ShowError(error.message))
+                        else -> customErrorHandler.invoke(error)
+                    }
                 } else {
                     // ⚠ Không custom → dùng handler chung
                     handleBaseError(error)
@@ -123,11 +130,13 @@ abstract class BaseViewModel : ViewModel() {
 
     protected open fun handleBaseError(error: BaseError) {
         /* Lỗi chung nhé*/
-//        when (error) {
-//            is BaseError.NetworkError -> sendEvent(UiEvent.ShowToast("No connection"))
-//            is BaseError.ServerError -> sendEvent(UiEvent.ShowToast("Server error, try again"))
-//            is BaseError.Unauthorized -> sendEvent(UiEvent.Logout)
-//            else -> sendEvent(UiEvent.ShowToast(error.message ?: "Unknown error"))
+        when (error) {
+            is BaseError.NetworkError -> sendEvent(DialogEvent.ShowError(error.message))
+            is BaseError.ServerError -> sendEvent(DialogEvent.ShowError("Server error, try again"))
+            is BaseError.Unauthorized -> sendEvent(DialogEvent.ShowError(error.message))
+            is BaseError.Forbidden -> sendEvent(DialogEvent.ShowError(error.message))
+            else -> sendEvent(DialogEvent.ShowError(error.message ?: "Unknown error"))
+        }
     }
 
 

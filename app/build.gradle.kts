@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.kapt)
-    alias(libs.plugins.realm.kotlin)
+    //alias(libs.plugins.realm.kotlin)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.kotlin.parcelize)
 }
@@ -68,7 +68,7 @@ dependencies {
     kapt(libs.androidx.room.compiler)
 
     //  Realm Kotlin SDK
-    implementation(libs.realm.kotlin)
+    //implementation(libs.realm.kotlin)
 
     // (tuỳ chọn) Hilt DI
     implementation(libs.dagger.hilt.android)
@@ -77,6 +77,7 @@ dependencies {
     // Hilt + Jetpack Compose Navigation
     implementation(libs.hilt.work)
     implementation(libs.hilt.navigation.compose)
+    implementation(libs.javapoet)
 
     implementation(libs.koin.core)
     implementation(libs.koin.android)

@@ -4,4 +4,6 @@
     <string name="t_m_ki_m_t_n">Tìm kiếm tên</string>
     <string name="confirm_title">Xác nhận</string>
     <string name="continue_title">Tiếp tục</string>
+    <string name="no_title">No</string>
+    <string name="yes_title">Yes</string>
 </resources>

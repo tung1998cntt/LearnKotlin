@@ -1,12 +1,23 @@
 
 #hilt
-@HiltAndroidApp : tạo singleton component
-@AndroidEntryPoint: đánh dấu 1 class cps hilt có tể inject dependency vào đó
-- Các class có thể dùng @AndroidEntryPoint:
-Activity
-Fragment
-View (Custom View)
-Service
-BroadcastReceiver
-ViewModel (khác với @HiltViewModel)
-- @Provides: Dùng trong Module để cho Hilt biết cách tạo instance của một class hoặc interface mà Hilt không thể tự biết cách tạo, dùng khi class không có @Inject constructor()
+
+- @HiltViewModel: inject vào ViewModel.
+- @HiltAndroidApp : Đặt vào class Application, tạo singleton component
+- @AndroidEntryPoint: Đánh dấu nơi bạn muốn nhận dependencies.Áp dụng cho:
+                                                              ✔ Activity
+                                                              ✔ Fragment
+                                                              ✔ ViewModel (qua HiltViewModel)
+                                                              ✔ Service
+                                                              ✔ BroadcastReceiver
+                                                              ✔ Worker
+- @Provides: Dùng trong Module để cho Hilt biết cách tạo instance của một class hoặc interface mà Hilt không thể tự biết cách tạo,
+đánh dấu method là factory method, cho Hilt biết cách tạo dependency, dùng khi class không có @Inject constructor(),
+Rule vàng: Bất cứ khi nào bạn muốn module cung cấp dependency cho Hilt, phải dùng @Provides.
+- Field injection chỉ dùng cho Android class (Activity/Fragment/ViewModel) do Android tạo.
+- @Module + @InstallIn: Dùng để cung cấp dependency (thường cho interface, Retrofit, OkHttp, DB…), dùng khi Hilt không tự tạo object được (không có @Inject constructor)
+- @Inject: + Dùng khi bạn muốn nhận hoặc tạo dependency:
+           + Inject vào constructor (khuyến khích), Nếu class có @Inject constructor → Hilt tự resolve → không cần module
+           + Inject vào field (ít dùng)
+           + Inject vào method (rất hiếm)
+- @Singleton: Scope của dependency → tạo duy nhất 1 lần trong ứng dụng.
+- @Binds → chỉ dùng trong abstract class module, cho interface → implementation
