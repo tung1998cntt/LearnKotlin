@@ -1,14 +1,17 @@
 package com.example.learnkotlin.presentation.ui.user
 
+import androidx.activity.viewModels
 import com.example.learnkotlin.databinding.ActivityUserDetailBinding
 import com.example.learnkotlin.domain.base.Event
 import com.example.learnkotlin.presentation.base.BaseActivity
 import com.example.learnkotlin.presentation.model.user.ProductNavData
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+
+@AndroidEntryPoint
 class UserDetailActivity : BaseActivity<ActivityUserDetailBinding>() {
 
-    override val viewModel: UserDetailViewModel by viewModel()
+    override val viewModel: UserDetailViewModel by viewModels()
     override fun inflateBinding() = ActivityUserDetailBinding.inflate(layoutInflater)
 
 

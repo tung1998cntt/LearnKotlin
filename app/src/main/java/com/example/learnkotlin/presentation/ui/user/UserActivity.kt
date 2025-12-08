@@ -1,6 +1,7 @@
 package com.example.learnkotlin.presentation.ui.user
 
 import androidx.activity.viewModels
+import com.example.learnkotlin.core.extensions.setSafeOnClick
 import com.example.learnkotlin.databinding.ActivityUserBinding
 import com.example.learnkotlin.domain.base.Event
 import com.example.learnkotlin.presentation.base.BaseActivity
@@ -31,11 +32,11 @@ class UserActivity : BaseActivity<ActivityUserBinding>() {
     }
 
     override fun onInit() {
-        binding.btnUserConfirm.setOnClickListener {
+        binding.btnUserConfirm.setSafeOnClick {
             sendCommand(UserCommand.LoadUsers)
         }
 
-        binding.btnUserNext.setOnClickListener {
+        binding.btnUserNext.setSafeOnClick {
             val productData = ProductNavData("p1", "Product1","20000")
             startActivity(UserDetailActivity::class.java, productData) { result ->
                 val returnedProduct = result as? ProductNavData

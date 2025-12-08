@@ -1,10 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.kapt)
-    //alias(libs.plugins.realm.kotlin)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.kotlin.parcelize)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -31,11 +30,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     buildFeatures {
         viewBinding =  true
@@ -65,22 +64,15 @@ dependencies {
     // 🏠 Room ORM
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    kapt(libs.androidx.room.compiler)
 
     //  Realm Kotlin SDK
     //implementation(libs.realm.kotlin)
 
     // (tuỳ chọn) Hilt DI
     implementation(libs.dagger.hilt.android)
-    kapt(libs.dagger.hilt.compiler)
+    ksp(libs.dagger.hilt.compiler) // Use KSP for Hilt
 
     // Hilt + Jetpack Compose Navigation
-    implementation(libs.hilt.work)
-    implementation(libs.hilt.navigation.compose)
-    implementation(libs.javapoet)
-
-    implementation(libs.koin.core)
-    implementation(libs.koin.android)
     implementation(libs.lottie)
 
     implementation(libs.gson)
@@ -89,4 +81,5 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
 
+    implementation(libs.fragment.ktx)
 }

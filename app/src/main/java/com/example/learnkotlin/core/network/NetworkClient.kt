@@ -7,8 +7,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object NetworkClient {
-
-    private const val BASE_URL = "https://api.example.com/"
+//https://jsonplaceholder.typicode.com/users
+    private const val BASE_URL = "https://jsonplaceholder.typicode.com/"
 
     fun provideOkHttpClient(): OkHttpClient = OkHttpClient.Builder()
         .addInterceptor {

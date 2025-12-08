@@ -1,12 +1,12 @@
 package com.example.learnkotlin.presentation.ui.user
 
+import androidx.fragment.app.viewModels
 import com.example.learnkotlin.databinding.FragmentUserBinding
 import com.example.learnkotlin.presentation.base.BaseFragment
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class UserFragment : BaseFragment<FragmentUserBinding>() {
 
-    override val viewModel: UserViewModel by viewModel()
+    override val viewModel: UserViewModel by viewModels()
 
     override fun inflateBinding(): FragmentUserBinding =
         FragmentUserBinding.inflate(layoutInflater)

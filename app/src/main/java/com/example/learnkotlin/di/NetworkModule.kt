@@ -1,6 +1,10 @@
 package com.example.learnkotlin.di
 
 import com.example.learnkotlin.core.network.ApiService
+import com.example.learnkotlin.core.network.AuthInterceptor
+import com.example.learnkotlin.core.network.BaseResponseAdapterFactory
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,18 +23,19 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideBaseUrl() = "https://api.example.com/"
+    fun provideBaseUrl() = "https://jsonplaceholder.typicode.com/"
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient = OkHttpClient.Builder()
-        .addInterceptor {
-            val request = it.request().newBuilder()
-                .addHeader("Accept", "application/json")
-                .addHeader("Content-Type", "application/json")
-                .build()
-            it.proceed(request)
-        }
+    fun provideOkHttpClient(authInterceptor: AuthInterceptor): OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor(authInterceptor)
+//        .addInterceptor {
+//            val request = it.request().newBuilder()
+//                .addHeader("Accept", "application/json")
+//                .addHeader("Content-Type", "application/json")
+//                .build()
+//            it.proceed(request)
+//        }
         .addInterceptor(HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         })
@@ -42,15 +47,28 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideRetrofit(client: OkHttpClient, baseUrl: String): Retrofit = Retrofit.Builder()
+    fun provideRetrofit(client: OkHttpClient, baseUrl: String, gson: Gson): Retrofit = Retrofit.Builder()
         .baseUrl(baseUrl)
         .client(client)
-        .addConverterFactory(GsonConverterFactory.create())
+        .addConverterFactory(GsonConverterFactory.create(gson))
         .build()
 
     @Provides
     @Singleton
     fun provideApiService(retrofit: Retrofit): ApiService =
         retrofit.create(ApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideAuthInterceptor(): AuthInterceptor = AuthInterceptor()
+
+    @Provides
+    @Singleton
+    fun provideGson(): Gson {
+        val builder = GsonBuilder()
+            .registerTypeAdapterFactory(BaseResponseAdapterFactory())
+            .serializeNulls()
+        return builder.create()
+    }
 
 }

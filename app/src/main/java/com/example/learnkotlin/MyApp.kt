@@ -5,8 +5,8 @@ import android.content.Context
 import android.content.res.Configuration
 
 import dagger.hilt.android.HiltAndroidApp
-import org.koin.android.ext.koin.androidContext
-import org.koin.core.context.startKoin
+//import org.koin.android.ext.koin.androidContext
+//import org.koin.core.context.startKoin
 import java.util.Locale
 
 @HiltAndroidApp   /* Tạo singleton Component*/
