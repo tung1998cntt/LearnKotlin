@@ -61,7 +61,7 @@ class SecureSharedPrefs private constructor(context: Context) {
 
         fun get(): SecureSharedPrefs {
             return instance ?: synchronized(this) {
-                instance ?: SecureSharedPrefs(MyApp.Companion.getContext()).also { instance = it }
+                instance ?: SecureSharedPrefs(MyApp.getContext()).also { instance = it }
             }
         }
     }

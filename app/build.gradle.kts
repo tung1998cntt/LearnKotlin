@@ -82,8 +82,8 @@ dependencies {
     implementation(libs.logging.interceptor)
 
     implementation(libs.fragment.ktx)
-    implementation(libs.exoplayer.core)
-    implementation(libs.exoplayer.hls)
-    implementation(libs.exoplayer.dash)
-    implementation(libs.exoplayer.ui)
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.ui)
+    implementation(libs.media3.exoplayer.hls)
+    implementation(libs.media3.exoplayer.dash)
 }

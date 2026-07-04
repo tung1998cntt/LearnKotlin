@@ -3,7 +3,9 @@ package com.example.learnkotlin.presentation.ui.user
 import androidx.fragment.app.viewModels
 import com.example.learnkotlin.databinding.FragmentUserBinding
 import com.example.learnkotlin.presentation.base.BaseFragment
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class UserFragment : BaseFragment<FragmentUserBinding>() {
 
     override val viewModel: UserViewModel by viewModels()

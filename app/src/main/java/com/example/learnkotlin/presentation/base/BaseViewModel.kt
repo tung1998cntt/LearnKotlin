@@ -118,7 +118,7 @@ abstract class BaseViewModel : ViewModel() {
                         else -> customErrorHandler.invoke(error)
                     }
                 } else {
-                    // ⚠ Không custom → dùng handler chung
+                    // Không custom → dùng handler chung
                     handleBaseError(error)
                 }
             } finally {

@@ -39,13 +39,10 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
     /** Subclass khởi tạo UI / gửi command ban đầu */
     abstract fun onInit()
 
-    private var lottieLoading: LottieAnimationView? = null
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = inflateBinding()
         initWindowInsets()
-        initLottieLoading()
         registerActivityResultLauncher()
         viewModel.onInit()
         observeEvents()
@@ -121,17 +118,11 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
     }
 
     protected open fun showLoading() {
-        lottieLoading?.apply {
-            visibility = View.VISIBLE
-            playAnimation()
-        }
+        (activity as? BaseActivity<*>)?.showLoading()
     }
 
     protected open fun hideLoading() {
-        lottieLoading?.apply {
-            cancelAnimation()
-            visibility = View.GONE
-        }
+        (activity as? BaseActivity<*>)?.hideLoading()
     }
 
     override fun onDestroyView() {
@@ -144,31 +135,6 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
-        }
-    }
-
-    private fun initLottieLoading() {
-        // Tạo Lottie AnimationView
-        lottieLoading = LottieAnimationView(requireContext()).apply {
-            layoutParams = FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                gravity = Gravity.CENTER
-            }
-            setAnimation(R.raw.animation_loading)
-            repeatCount = LottieDrawable.INFINITE
-            visibility = View.GONE
-        }
-
-        // Lấy root view của activity
-        val rootView = requireActivity().findViewById<ViewGroup>(android.R.id.content)
-
-        // Nếu rootView là FrameLayout hoặc ViewGroup, add Lottie vào
-        if (rootView != null) {
-            rootView.addView(lottieLoading)
-        } else {
-            Log.w("BaseActivity", "Root view is not a ViewGroup, cannot add Lottie")
         }
     }
 }
