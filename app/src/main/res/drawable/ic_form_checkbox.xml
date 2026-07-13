@@ -1,0 +1,20 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="@dimen/dimen_16dp"
+    android:height="@dimen/dimen_16dp"
+    android:viewportWidth="16"
+    android:viewportHeight="16">
+    <!-- Khung checkbox màu đỏ -->
+    <path
+        android:fillColor="@color/color_FF0000"
+        android:pathData="M2,0.5L14,0.5A1.5,1.5 0,0 1,15.5 2L15.5,14A1.5,1.5 0,0 1,14 15.5L2,15.5A1.5,1.5 0,0 1,0.5 14L0.5,2A1.5,1.5 0,0 1,2 0.5z"
+        android:strokeWidth="1"
+        android:strokeColor="@color/color_FF0000" />
+    <!-- Dấu tick màu trắng bên trong -->
+    <path
+        android:fillColor="@color/color_00000000"
+        android:pathData="M4,8 L7,11 L12,5"
+        android:strokeWidth="1.5"
+        android:strokeColor="@color/white"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

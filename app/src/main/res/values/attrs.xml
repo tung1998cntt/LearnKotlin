@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="SearchInputView">
+        <attr name="inputHint" format="string" />
+        <attr name="inputText" format="string" />
+        <attr name="leftIcon" format="reference" />
+
+        <attr name="android:textSize" />
+        <attr name="android:textColor" />
+        <attr name="android:textStyle" />
+        <attr name="android:textColorHint" />
+        <attr name="android:maxLength" />
+    </declare-styleable>
+
+    <declare-styleable name="SegmentedControlView">
+
+        <attr name="leftText" format="string" />
+        <attr name="rightText" format="string" />
+
+        <attr name="selectedIndex" format="integer" />
+
+        <attr name="selectedTextColor" format="color" />
+        <attr name="normalTextColor" format="color" />
+
+        <attr name="indicatorColor" format="color" />
+        <attr name="segmentBackgroundColor" format="color" />
+
+    </declare-styleable>
+
+</resources>

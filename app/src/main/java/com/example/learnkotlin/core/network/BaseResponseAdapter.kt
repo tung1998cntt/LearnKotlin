@@ -10,23 +10,45 @@ import com.google.gson.stream.JsonWriter
 import java.lang.reflect.ParameterizedType
 
 class BaseResponseAdapterFactory : TypeAdapterFactory {
-    override fun <T> create(gson: Gson, type: TypeToken<T>): TypeAdapter<T>? {
-        val rawType = type.rawType
-        if (rawType != BaseResponse::class.java) return null
+
+    override fun <T> create(
+        gson: Gson,
+        type: TypeToken<T>
+    ): TypeAdapter<T>? {
+
+        if (type.rawType != BaseResponse::class.java) {
+            return null
+        }
+
+        val delegate = gson.getDelegateAdapter(this, type)
 
         return object : TypeAdapter<T>() {
-            override fun write(out: JsonWriter?, value: T?) {
-                gson.getAdapter(type).write(out, value)
+
+            override fun write(out: JsonWriter, value: T) {
+                delegate.write(out, value)
             }
 
-            override fun read(reader: JsonReader?): T {
+            override fun read(reader: JsonReader): T {
+
                 val element = JsonParser.parseReader(reader)
-                val dataField = (type.type as ParameterizedType).actualTypeArguments[0]
-                val adapter = gson.getAdapter(TypeToken.get(dataField))
+
+                val dataType =
+                    (type.type as ParameterizedType)
+                        .actualTypeArguments[0]
+
+                val adapter =
+                    gson.getAdapter(TypeToken.get(dataType))
+
                 return if (element.isJsonArray) {
-                    BaseResponse(data = adapter.fromJsonTree(element)) as T
+
+                    BaseResponse(
+                        data = adapter.fromJsonTree(element)
+                    ) as T
+
                 } else {
-                    gson.getAdapter(type).fromJsonTree(element)
+
+                    delegate.fromJsonTree(element)
+
                 }
             }
         }

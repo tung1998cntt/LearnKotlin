@@ -2,23 +2,23 @@ package com.example.learnkotlin.presentation.base
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.viewbinding.ViewBinding
-import com.airbnb.lottie.LottieAnimationView
-import com.airbnb.lottie.LottieDrawable
-import com.example.learnkotlin.R
 import com.example.learnkotlin.domain.base.Command
-import kotlinx.coroutines.flow.collectLatest
+import com.example.learnkotlin.presentation.state.UiState
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 abstract class BaseFragment<VB : ViewBinding> : Fragment() {
@@ -28,10 +28,13 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
     private lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
     protected var _binding: VB? = null
     protected val binding get() = _binding!!
-    protected abstract val viewModel: BaseViewModel
+    protected abstract val viewModel: BaseViewModel<*>
 
     /** Subclass cung cấp inflate binding */
-    abstract fun inflateBinding(): VB
+    abstract fun inflateBinding(
+        inflater: LayoutInflater,
+        container: ViewGroup?
+    ): VB
 
     /** Subclass xử lý event */
     abstract fun handleEvent(event: Any)
@@ -39,9 +42,17 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
     /** Subclass khởi tạo UI / gửi command ban đầu */
     abstract fun onInit()
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = inflateBinding(inflater, container)
+        return binding.root
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        _binding = inflateBinding()
         initWindowInsets()
         registerActivityResultLauncher()
         viewModel.onInit()
@@ -62,15 +73,73 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
 
     private fun observeEvents() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.events.collectLatest { event ->
-                when (event) {
-                    UiEvent.Loading -> showLoading()
-                    UiEvent.HideLoading -> hideLoading()
-                    is UiEvent.Error -> {
-                        hideLoading()
-                        handleError(event.message)
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.events.collect { event ->
+                    when (event) {
+                        UiEvent.Loading -> showLoading()
+                        UiEvent.HideLoading -> hideLoading()
+                        is UiEvent.Error -> {
+                            hideLoading()
+                            handleError(event.message)
+                        }
+                        else -> handleEvent(event)
                     }
                 }
+            }
+        }
+    }
+    /**
+     * Collect toàn bộ State.
+     * Callback sẽ được gọi mỗi khi bất kỳ field nào trong State thay đổi.
+     *
+     * Ví dụ:
+     * collectState<HomeState> { state ->
+     *     render(state)
+     * }
+     */
+
+    protected fun <S : UiState> collectState(
+        block: suspend (S) -> Unit
+    ) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                @Suppress("UNCHECKED_CAST")
+                (viewModel.state as StateFlow<S>).collect {
+                    block(it)
+                }
+
+            }
+        }
+    }
+
+
+    /**
+     * Collect một phần của State.
+     * Chỉ callback khi giá trị được selector trả về thay đổi
+     * (distinctUntilChanged()).
+     *
+     * Ví dụ:
+     * collectState<HomeState, User?>(
+     *     selector = { it.user }
+     * ) {
+     *     showUser(it)
+     * }
+     */
+    protected fun <S : UiState, T> collectState(
+        selector: (S) -> T,
+        block: suspend (T) -> Unit
+    ) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                @Suppress("UNCHECKED_CAST")
+                (viewModel.state as StateFlow<S>)
+                    .map(selector)
+                    .distinctUntilChanged()
+                    .collect {
+                        block(it)
+                    }
+
             }
         }
     }
@@ -117,6 +186,9 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
         viewModel.sendCommand(command)
     }
 
+    protected open fun showErrorDialog(message: String? = null,  onConfirm: (() -> Unit)? = null) {
+        (activity as? BaseActivity<*>)?.showConfirmDialog(title = message, onConfirm = onConfirm)
+    }
     protected open fun showLoading() {
         (activity as? BaseActivity<*>)?.showLoading()
     }

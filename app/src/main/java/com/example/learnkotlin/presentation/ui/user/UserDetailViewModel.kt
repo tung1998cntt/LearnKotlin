@@ -7,12 +7,13 @@ import com.example.learnkotlin.domain.base.Command
 import com.example.learnkotlin.domain.usecase.user.UserUseCase
 import com.example.learnkotlin.presentation.base.BaseViewModel
 import com.example.learnkotlin.presentation.model.user.ProductNavData
+import com.example.learnkotlin.presentation.state.EmptyState
 import javax.inject.Inject
 
 class UserDetailViewModel @Inject constructor(
     private val useCase: UserUseCase
-): BaseViewModel()  {
-
+): BaseViewModel<EmptyState>()  {
+    override fun createInitialState(): EmptyState = EmptyState
     override fun onReady() {
         super.onReady()
         val userNav = initData as? ProductNavData

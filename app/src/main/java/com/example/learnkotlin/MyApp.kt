@@ -3,8 +3,10 @@ package com.example.learnkotlin
 import android.app.Application
 import android.content.Context
 import android.content.res.Configuration
+import com.maptiler.maptilersdk.MTConfig
 
 import dagger.hilt.android.HiltAndroidApp
+import org.maplibre.android.MapLibre
 //import org.koin.android.ext.koin.androidContext
 //import org.koin.core.context.startKoin
 import java.util.Locale
@@ -14,6 +16,8 @@ class MyApp: Application() {
 
     override fun onCreate() {
         super.onCreate()
+        MapLibre.getInstance(this)
+        MTConfig.apiKey = BuildConfig.MAPTILER_API_KEY
 //        startKoin {
 //            androidContext(this@MyApp)
 //            modules(appModule)

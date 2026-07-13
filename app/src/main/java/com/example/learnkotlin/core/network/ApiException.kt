@@ -1,6 +1,8 @@
 package com.example.learnkotlin.core.network
 
-sealed class ApiException(message: String? = null, val code: Int? = null) : Exception(message) {
+import java.io.IOException
+
+sealed class ApiException(message: String? = null, val code: Int? = null) : IOException(message) {
 
     class NetworkError(message: String? = "Network error") : ApiException(message)
     class Unauthorized(message: String? = "Unauthorized", code: Int = 401) : ApiException(message, code)

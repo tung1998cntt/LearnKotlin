@@ -6,4 +6,23 @@
     <string name="continue_title">Tiếp tục</string>
     <string name="no_title">No</string>
     <string name="yes_title">Yes</string>
+    <string name="home_menu_title">Home</string>
+    <string name="routes_menu_title">Routes</string>
+    <string name="profile_menu_title">Profile</string>
+    <string name="paramaribo_suriname">Paramaribo, Suriname</string>
+    <string name="hello_there_title">Hello there 👋</string>
+    <string name="where_are_you_going_title">Where are you going?</string>
+    <string name="search_hint_title">Tìm kiếm…</string>
+    <string name="from_current_location_hint_text">From (current location)</string>
+    <string name="type_a_destination_or_stop_hint_text">Type a destination or stop</string>
+    <string name="find_route_title">Find route</string>
+    <string name="search_results_title">Search results</string>
+    <string name="suggested_routes_tab_title">Suggested routes</string>
+    <string name="arriving_buses_tab_title">Arriving buses</string>
+    <string name="arriving_at_your_stop_s">Arriving at your stop: %s</string>
+    <string name="search_by_route_name_or_stops_hint_text">Search by route name or stops</string>
+    <string name="view_details_title_button">View details</string>
+    <string name="every_s_min">Every %s min</string>
+    <string name="number_stop">%s Stops</string>
+    <string name="srd_s">SRD %s</string>
 </resources>

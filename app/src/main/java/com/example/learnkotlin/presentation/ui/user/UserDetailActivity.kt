@@ -5,6 +5,7 @@ import com.example.learnkotlin.databinding.ActivityUserDetailBinding
 import com.example.learnkotlin.domain.base.Event
 import com.example.learnkotlin.presentation.base.BaseActivity
 import com.example.learnkotlin.presentation.model.user.ProductNavData
+import com.example.learnkotlin.presentation.state.UiState
 import dagger.hilt.android.AndroidEntryPoint
 
 

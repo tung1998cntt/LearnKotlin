@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -6,18 +8,31 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+val localProperties = Properties().apply {
+    load(rootProject.file("local.properties").inputStream())
+}
+val mapTilerApiKey = localProperties.getProperty("MAPTILER_API_KEY") ?: ""
+
 android {
     namespace = "com.example.learnkotlin"
     compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.learnkotlin"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+
+        buildConfigField(
+            "String",
+            "MAPTILER_API_KEY",
+            "\"$mapTilerApiKey\""
+        )
+
     }
 
     buildTypes {
@@ -37,7 +52,8 @@ android {
         jvmTarget = "17"
     }
     buildFeatures {
-        viewBinding =  true
+        viewBinding = true
+        buildConfig = true
     }
 }
 
@@ -86,4 +102,7 @@ dependencies {
     implementation(libs.media3.ui)
     implementation(libs.media3.exoplayer.hls)
     implementation(libs.media3.exoplayer.dash)
+    implementation(libs.maptiler.sdk.kotlin)
+    implementation(libs.maplibre)
+    implementation(libs.play.services.location)
 }

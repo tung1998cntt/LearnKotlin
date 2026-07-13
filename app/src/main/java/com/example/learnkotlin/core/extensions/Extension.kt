@@ -22,6 +22,20 @@ suspend fun <T> safeApiCall(apiCall: suspend () -> BaseResponse<T>): ApiResult<T
     }
 }
 
+suspend fun <T> safeApiCallNotBase(
+    apiCall: suspend () -> T
+): ApiResult<T> {
+    return try {
+        ApiResult.Success(apiCall())
+    } catch (e: Exception) {
+        val code = (e as? ApiException)?.code
+        ApiResult.Error(
+            code.toString(),
+            e.message ?: "Unknown error"
+        )
+    }
+}
+
 fun View.setSafeOnClick(interval: Long = 600L, onClick: (View) -> Unit) {
     var lastClickTime = 0L
 

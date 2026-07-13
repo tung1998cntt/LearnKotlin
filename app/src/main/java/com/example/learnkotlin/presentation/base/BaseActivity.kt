@@ -1,21 +1,31 @@
 package com.example.learnkotlin.presentation.base
 
+import android.content.Context
 import android.content.Intent
+import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
-import android.util.Log
 import android.view.Gravity
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import android.widget.FrameLayout
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.viewbinding.ViewBinding
 import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieDrawable
@@ -23,12 +33,16 @@ import com.example.learnkotlin.R
 import com.example.learnkotlin.domain.base.Command
 import com.example.learnkotlin.domain.base.Event
 import com.example.learnkotlin.presentation.base.dialog.ConfirmDialog
+import com.example.learnkotlin.presentation.state.UiState
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
 
     protected lateinit var binding: VB
-    protected abstract val viewModel: BaseViewModel
+    protected abstract val viewModel: BaseViewModel<*>
 
     private val launcherMap =
         mutableMapOf<Int, androidx.activity.result.ActivityResultLauncher<Intent>>()
@@ -48,12 +62,13 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
     abstract fun onInit()
 
     private var lottieLoading: LottieAnimationView? = null
+    private var loadingOverlay: FrameLayout? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         binding = inflateBinding()
         setContentView(binding.root)
-        initWindowInsets()
         initLottieLoading()
         registerActivityResultLauncher()
         viewModel.onInit()
@@ -67,17 +82,54 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
     /** Collect tất cả event từ ViewModel */
     private fun observeEvents() {
         lifecycleScope.launch {
-            viewModel.events.collect { event ->
-                when (event) {
-                    is UiEvent.Loading -> showLoading()
-                    is UiEvent.HideLoading -> hideLoading()
-                    is DialogEvent.ShowError -> {
-                        showConfirmDialog(title = event.message, onConfirm = {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.events.collect { event ->
+                    when (event) {
+                        is UiEvent.Loading -> showLoading()
+                        is UiEvent.HideLoading -> hideLoading()
+                        is DialogEvent.ShowError -> {
+                            showConfirmDialog(title = event.message, onConfirm = {
 
-                        })
+                            })
+                        }
+
+                        else -> handleEvent(event)
                     }
-                    else -> handleEvent(event)
                 }
+            }
+        }
+    }
+
+    protected fun <S : UiState> collectState(
+        block: suspend (S) -> Unit
+    ) {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                @Suppress("UNCHECKED_CAST")
+                (viewModel.state as StateFlow<S>).collect {
+                    block(it)
+                }
+
+            }
+        }
+    }
+
+    protected fun <S : UiState, T> collectState(
+        selector: (S) -> T,
+        block: suspend (T) -> Unit
+    ) {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                @Suppress("UNCHECKED_CAST")
+                (viewModel.state as StateFlow<S>)
+                    .map(selector)
+                    .distinctUntilChanged()
+                    .collect {
+                        block(it)
+                    }
+
             }
         }
     }
@@ -86,50 +138,73 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
         viewModel.sendCommand(command)
     }
 
-     open fun showLoading() {
-         if (isFinishing || isDestroyed) return
-        lottieLoading?.apply {
-            visibility = View.VISIBLE
-            playAnimation()
-        }
+    open fun showLoading() {
+        if (isFinishing || isDestroyed) return
+        loadingOverlay?.visibility = View.VISIBLE
+        lottieLoading?.playAnimation()
     }
 
-     open fun hideLoading() {
-        lottieLoading?.apply {
-            cancelAnimation()
-            visibility = View.GONE
-        }
+    open fun hideLoading() {
+        lottieLoading?.cancelAnimation()
+        loadingOverlay?.visibility = View.GONE
     }
 
-    private fun initWindowInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+    protected fun applyInsets(
+        view: View,
+        applyStatusBar: Boolean = false,
+        applyNavigationBar: Boolean = false
+    ) {
+
+        val startTop = view.paddingTop
+        val startBottom = view.paddingBottom
+        val startLeft = view.paddingLeft
+        val startRight = view.paddingRight
+        ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->
+            val status = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            val navigation = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            v.setPadding(
+                startLeft,
+                startTop + if (applyStatusBar) status.top else 0,
+                startRight,
+                startBottom + if (applyNavigationBar) navigation.bottom else 0
+            )
             insets
         }
+
+        ViewCompat.requestApplyInsets(view)
     }
 
 
     // Hàm initLottieLoading nên kiểm tra tránh add nhiều lần (trong trường hợp gọi lại onCreate)
     private fun initLottieLoading() {
-        val rootView = findViewById<ViewGroup>(android.R.id.content) ?: return
+        val root = window.decorView as ViewGroup
 
-        // Kiểm tra nếu đã có lottieLoading rồi thì không tạo mới
-        if (lottieLoading == null) {
-            lottieLoading = LottieAnimationView(this).apply {
+        loadingOverlay = FrameLayout(this).apply {
+
+            layoutParams = FrameLayout.LayoutParams(
+                MATCH_PARENT,
+                MATCH_PARENT
+            )
+            visibility = View.GONE
+            isClickable = true
+            isFocusable = true
+            isFocusableInTouchMode = true
+            elevation = 1000f
+            // hoặc
+            // translationZ = 1000f
+            setBackgroundColor(0x55000000)
+            lottieLoading = LottieAnimationView(context).apply {
                 layoutParams = FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.WRAP_CONTENT,
-                    FrameLayout.LayoutParams.WRAP_CONTENT
-                ).apply {
-                    gravity = Gravity.CENTER
-                }
+                    WRAP_CONTENT,
+                    WRAP_CONTENT,
+                    Gravity.CENTER
+                )
                 setAnimation(R.raw.animation_loading)
                 repeatCount = LottieDrawable.INFINITE
-                visibility = View.GONE
-                elevation = 100f // Đảm bảo luôn nằm trên cùng
             }
-            rootView.addView(lottieLoading)
+            addView(lottieLoading)
         }
+        root.addView(loadingOverlay)
     }
 
 
@@ -204,6 +279,25 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
                 onConfirm = onConfirm
             ).show(supportFragmentManager, "ConfirmDialog")
         }
+    }
+
+    /** Tự động ẩn bàn phím và nhả focus khi click ra ngoài bất kỳ EditText nào */
+    override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
+        if (event?.action == MotionEvent.ACTION_DOWN) {
+            val v = currentFocus
+            if (v is EditText) {
+                val outRect = Rect()
+                v.getGlobalVisibleRect(outRect)
+
+                // Nếu điểm chạm nằm ngoài vùng bounds của EditText đang focus
+                if (!outRect.contains(event.rawX.toInt(), event.rawY.toInt())) {
+                    v.clearFocus()
+                    val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                    imm?.hideSoftInputFromWindow(v.windowToken, 0)
+                }
+            }
+        }
+        return super.dispatchTouchEvent(event)
     }
 
 }

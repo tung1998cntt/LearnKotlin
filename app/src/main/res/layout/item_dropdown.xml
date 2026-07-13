@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="@dimen/dimen_10dp"
+    android:paddingVertical="@dimen/dimen_4dp">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvItemTitle"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:paddingHorizontal="@dimen/dimen_10dp"
+        android:background="@drawable/selector_dropdown_item"
+        android:gravity="start|center"
+        android:textColor="@color/selector_dropdown_text"
+        android:textSize="@dimen/dimen_15sp"
+        tools:text="dfssdf" />
+
+</LinearLayout>

@@ -1,18 +1,26 @@
 package com.example.learnkotlin.core.network
 
+import com.example.learnkotlin.core.constants.Tags
+import com.example.learnkotlin.core.secure.SecureSharedPrefs
 import okhttp3.Interceptor
 import okhttp3.Response
 import java.io.IOException
 
 class AuthInterceptor : Interceptor {
-
     override fun intercept(chain: Interceptor.Chain): Response {
+        val token = SecureSharedPrefs.get().getString(Tags.ACCESS_TOKEN)
+        
         return try {
-            val request = chain.request().newBuilder()
-                .addHeader("Accept", "application/json")
+            val requestBuilder = chain.request().newBuilder()
                 .addHeader("Content-Type", "application/json")
-                .build()
+            
+            if (!token.isNullOrEmpty()) {
+                requestBuilder.header("Authorization", "Bearer $token")
+            }
+            requestBuilder.addHeader("AppKey", "CuUTtsmfjMBOKeMEpkAo")
+            requestBuilder.addHeader("AppSecret", "Ga8lL0lMVFr6fJoudGgJR9upsXuIgGxz")
 
+            val request = requestBuilder.build()
             val response = chain.proceed(request)
 
             // HTTP lỗi do server trả

@@ -3,4 +3,21 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="color_0006FF">#0006FF</color>
+    <color name="color_EE0033">#EE0033</color>
+    <color name="color_7A7A7A">#7A7A7A</color>
+    <color name="color_B6B6B6">#B6B6B6</color>
+    <color name="color_4B4B4B">#4B4B4B</color>
+    <color name="color_14747480">#14747480</color>
+    <color name="color_14EE0033">#14EE0033</color>
+    <color name="color_6B6C70">#6B6C70</color>
+    <color name="color_00000000">#00000000</color>
+    <color name="color_000000">#000000</color>
+    <color name="color_FF0000">#FF0000</color>
+    <color name="color_F0F9F9F9">#F0F9F9F9</color>
+    <color name="color_73A5A3AE">#73A5A3AE</color>
+    <color name="color_001737">#001737</color>
+    <color name="color_29A8AAAE">#29A8AAAE</color>
+    <color name="color_EA5455">#EA5455</color>
+    <color name="color_29EA5455">#29EA5455</color>
+    <color name="color_1F767680">#1F767680</color>
 </resources>
