@@ -2,6 +2,8 @@ package com.example.learnkotlin.presentation.home
 
 import com.example.learnkotlin.domain.base.Command
 import com.example.learnkotlin.domain.model.home.Area
+import com.example.learnkotlin.domain.model.home.LocationSearch
+import com.example.learnkotlin.domain.model.home.NearbyArrivalResponse
 import com.example.learnkotlin.domain.model.home.SearchLocation
 import com.example.learnkotlin.domain.model.home.SegmentType
 import com.example.learnkotlin.domain.model.home.Variant
@@ -61,6 +63,10 @@ sealed class HomeCommand : Command {
     data class ChangeSegment(
         val segment: SegmentType
     ) : HomeCommand()
+
+    data class GetSuggestRoutes(val locationSearch: LocationSearch? = null) : HomeCommand()
+
+    data class GetNearbyRoutes(val locationSearch: LocationSearch? = null) : HomeCommand()
 
 
 }

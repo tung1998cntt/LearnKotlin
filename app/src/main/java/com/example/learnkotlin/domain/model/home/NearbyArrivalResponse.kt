@@ -1,6 +1,7 @@
 package com.example.learnkotlin.domain.model.home
 
 import android.os.Parcelable
+import com.example.learnkotlin.presentation.home.NearbyArrivalItem
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -8,7 +9,8 @@ data class NearbyArrivalResponse(
     val origin: Origin?,
     val radiusMeters: Int,
     val pagination: Pagination?,
-    val stops: List<Stop>
+    val stops: List<Stop>,
+    val listNearbyArrivalItem: List<NearbyArrivalItem>? = null
 ): Parcelable
 
 @Parcelize

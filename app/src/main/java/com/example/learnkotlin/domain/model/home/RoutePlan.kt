@@ -1,6 +1,8 @@
 package com.example.learnkotlin.domain.model.home
 
 import android.os.Parcelable
+import com.example.learnkotlin.presentation.base.NavData
+import com.example.learnkotlin.presentation.home.SuggestRouteItem
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -12,8 +14,10 @@ data class RoutePlan(
 
     val to: RouteLocation? = null,
 
-    val itineraries: List<Itinerary>? = null
-): Parcelable
+    val itineraries: List<Itinerary>? = null,
+
+    val routeItems: List<SuggestRouteItem>? = null
+): Parcelable, NavData
 
 
 @Parcelize
@@ -24,7 +28,7 @@ data class RouteLocation(
     val latitude: Double? = null,
 
     val longitude: Double? = null
-): Parcelable
+): Parcelable, NavData
 
 @Parcelize
 data class Itinerary(
@@ -42,7 +46,7 @@ data class Itinerary(
     val transfers: Int? = null,
 
     val legs: List<RouteLeg>? = null
-): Parcelable
+): Parcelable, NavData
 
 @Parcelize
 data class RouteLeg(
@@ -72,4 +76,4 @@ data class RouteLeg(
     val agencyId: String? = null,
 
     val agencyName: String? = null
-): Parcelable
+): Parcelable, NavData

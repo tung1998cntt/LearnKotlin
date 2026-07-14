@@ -9,6 +9,7 @@ import com.example.learnkotlin.domain.model.home.Itinerary
 import com.example.learnkotlin.domain.model.home.RouteLeg
 import com.example.learnkotlin.domain.model.home.RouteLocation
 import com.example.learnkotlin.domain.model.home.RoutePlan
+import com.example.learnkotlin.presentation.home.SuggestRouteItem
 import javax.inject.Inject
 
 class RoutePlanMapper @Inject constructor() :
@@ -22,7 +23,8 @@ class RoutePlanMapper @Inject constructor() :
             to = input.to.toDomain(),
             itineraries = input.itineraries
                 ?.map { it.toDomain() }
-                .orEmpty()
+                .orEmpty(),
+            routeItems = input.toItems()
         )
     }
 
@@ -54,6 +56,28 @@ class RoutePlanMapper @Inject constructor() :
                 ?.map { it.toDomain() }
                 .orEmpty()
         )
+
+
+    fun RoutePlanResponseDto.toItems(): List<SuggestRouteItem> {
+
+        return itineraries?.map { itinerary ->
+
+            val busLeg = itinerary.legs?.firstOrNull { it.transitLeg == true }
+
+            val busTime =
+                itinerary.legs?.filter { it.mode == "BUS" }?.sumOf { it.duration ?: 0L }
+
+            val walkTime =
+                itinerary.legs?.filter { it.mode == "WALK" }?.sumOf { it.duration ?: 0L }
+
+            SuggestRouteItem(
+                routeId = busLeg?.routeId.orEmpty(),
+                routeName = busLeg?.routeName.orEmpty(),
+                busMinutes = ((busTime ?: 0L) / 60).toInt(),
+                walkMinutes = ((walkTime ?: 0L) / 60).toInt()
+            )
+        } ?: listOf()
+    }
 
     private fun LegDto.toDomain() =
         RouteLeg(

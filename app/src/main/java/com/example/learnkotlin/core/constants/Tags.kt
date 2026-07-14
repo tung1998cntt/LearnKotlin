@@ -6,6 +6,8 @@ object Tags {
     const val DATA = "data"
     const val BASE_URL = "http://116.101.122.190:8955/"
     const val MAPTILER_BASE_URL = "https://api.maptiler.com/"
+    const val PLAN_BASE_URL = "http://116.101.122.190:8933/"
+    //const val PLAN_BASE_URL = "http://116.101.122.190:8955/"
     const val APP_KEY = "CuUTtsmfjMBOKeMEpkAo"
     const val APP_SECRET = "Ga8lL0lMVFr6fJoudGgJR9upsXuIgGxz"
     const val DEFAULT_TIMEOUT = 50

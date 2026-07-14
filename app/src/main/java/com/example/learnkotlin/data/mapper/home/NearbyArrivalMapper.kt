@@ -13,6 +13,7 @@ import com.example.learnkotlin.domain.model.home.Origin
 import com.example.learnkotlin.domain.model.home.Pagination
 import com.example.learnkotlin.domain.model.home.Stop
 import com.example.learnkotlin.domain.model.home.Vehicle
+import com.example.learnkotlin.presentation.home.NearbyArrivalItem
 import javax.inject.Inject
 
 class NearbyArrivalMapper @Inject constructor() :
@@ -24,8 +25,35 @@ class NearbyArrivalMapper @Inject constructor() :
             origin = input.origin?.toDomain(),
             radiusMeters = input.radiusMeters,
             pagination = input.pagination?.toDomain(),
-            stops = input.stops.map { it.toDomain() }
+            stops = input.stops.map { it.toDomain() },
+            listNearbyArrivalItem = input.toItems()
         )
+    }
+
+    fun NearbyArrivalResponseDto.toItems(): List<NearbyArrivalItem> {
+
+        return stops.flatMap { stop ->
+
+            stop.arrivals.map { arrival ->
+
+                val vehicle = arrival.vehicles.firstOrNull()
+
+                NearbyArrivalItem(
+                    routeId = arrival.routeId,
+                    routeName = stop.stopName,
+                    plate = vehicle?.licensePlate.orEmpty(),
+                    etaTime = arrival.estimatedArrival.toHourMinute(),       // 19:10
+                    etaMinutes = arrival.minutesToArrival
+                )
+            }
+        }
+    }
+
+    private fun String.toHourMinute(): String {
+
+        return java.time.OffsetDateTime.parse(this)
+            .toLocalTime()
+            .format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))
     }
 
     private fun OriginDto.toDomain() = Origin(

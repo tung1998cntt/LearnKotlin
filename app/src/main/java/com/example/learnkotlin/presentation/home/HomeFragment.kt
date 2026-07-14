@@ -18,6 +18,7 @@ import com.example.learnkotlin.core.extensions.setSafeOnClick
 import com.example.learnkotlin.databinding.FragmentHomeBinding
 import com.example.learnkotlin.domain.base.Command
 import com.example.learnkotlin.domain.base.customview.SearchInputView
+import com.example.learnkotlin.domain.model.home.LocationSearch
 import com.example.learnkotlin.domain.model.home.SearchLocation
 import com.example.learnkotlin.presentation.base.BaseFragment
 import com.example.learnkotlin.presentation.base.baseDropdown.BaseDropdownAdapter
@@ -324,7 +325,14 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         )
 
         binding.lnFindRoute.setSafeOnClick {
-            sendCommand(HomeCommand.FindRoute)
+           // sendCommand(HomeCommand.FindRoute)
+            startActivity(
+                clazz = SearchResultActivity::class.java,
+                data = LocationSearch(
+                    viewModel.state.value.selectedCurrentLocation,
+                    viewModel.state.value.selectedDestination
+                )
+            )
         }
 
     }
@@ -537,6 +545,13 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                     binding.viewAnchorDestination,
                     viewModel.state.value.selectedDestination,
                     event.data
+                )
+            }
+
+            is HomeEvent.GetSuggestRoutesSuccess -> {
+                startActivity(
+                    clazz = SearchResultActivity::class.java,
+                    data = event.data
                 )
             }
 

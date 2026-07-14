@@ -21,20 +21,6 @@ interface ApiService {
     @GET("users")
     suspend fun getUsers(): BaseResponse<List<User>>
 
-    @POST("api/v1/plan")
-    suspend fun getSuggestRoutes(
-        @Query("fromLat") fromLat: Double,
-        @Query("fromLon") fromLon: Double,
-        @Query("toLat") toLat: Double,
-        @Query("toLon") toLon: Double
-    ): RoutePlanResponseDto
-
-    @POST("api/v1/nearby-arrivals")
-    suspend fun getNearbyArrivals(
-        @Body request: NearbyArrivalRequestDto
-    ): NearbyArrivalResponseDto
-
-
     @POST("/api/devices/vtracking/vehicle/route/list")
     suspend fun getRouteList(
         @Query("limit") limit: Int,

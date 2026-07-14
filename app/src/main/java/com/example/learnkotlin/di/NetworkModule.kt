@@ -6,6 +6,7 @@ import com.example.learnkotlin.core.network.ApiService
 import com.example.learnkotlin.core.network.AuthInterceptor
 import com.example.learnkotlin.core.network.BaseResponseAdapterFactory
 import com.example.learnkotlin.core.network.GeocodingApi
+import com.example.learnkotlin.core.network.PlanApiService
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.Module
@@ -26,6 +27,11 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
+
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class PlanRetrofit
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
@@ -109,12 +115,37 @@ object NetworkModule {
     }
 
     @Provides
+    @Singleton
+    @PlanRetrofit
+    fun providePlanRetrofit(
+        @ApiClient client: OkHttpClient,
+        gson: Gson
+    ): Retrofit {
+
+        return Retrofit.Builder()
+            .baseUrl(Tags.PLAN_BASE_URL)
+            .client(client)
+            .addConverterFactory(NullOnEmptyConverterFactory())
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build()
+    }
+
+    @Provides
     fun provideGeocodingApi(
         @MapTilerRetrofit
         retrofit: Retrofit
     ): GeocodingApi {
         return retrofit.create(GeocodingApi::class.java)
 
+    }
+
+
+    @Provides
+    @Singleton
+    fun providePlanApiService(
+        @PlanRetrofit retrofit: Retrofit
+    ): PlanApiService {
+        return retrofit.create(PlanApiService::class.java)
     }
 
     @Provides

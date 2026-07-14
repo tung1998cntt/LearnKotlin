@@ -84,6 +84,10 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             dialog.show(childFragmentManager, "FeedbackDialog")
         }
 
+        binding.imBack.setSafeOnClick {
+            requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
+
     }
 
     override fun handleEvent(event: Any) {

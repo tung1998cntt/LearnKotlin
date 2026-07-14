@@ -48,16 +48,31 @@ class HomeUseCase @Inject constructor(
 
     suspend fun getSuggestRoutes(
         request: RoutePlanRequest
-    ): RoutePlan {
-        return homeRepository.getSuggestRoutes(request)
+    ): ApiResult<RoutePlan>{
+        return when (val result = homeRepository.getSuggestRoutes(request)) {
+            is ApiResult.Success -> {
+                ApiResult.Success(
+                    result.data
+                )
+            }
+            is ApiResult.Error -> result
+        }
     }
 
     suspend fun getNearbyArrivals(
         request: NearbyArrivalRequest
-    ): NearbyArrivalResponse {
+    ): ApiResult<NearbyArrivalResponse> {
 
-        return homeRepository.getNearbyArrivals(request)
+        return when (val result = homeRepository.getNearbyArrivals(request)) {
+            is ApiResult.Success -> {
+                ApiResult.Success(
+                    result.data
+                )
+            }
+            is ApiResult.Error -> result
+        }
     }
+
     suspend fun getRouteList(
         request: RouteListRequest
     ): ApiResult<RouteListResponse> {

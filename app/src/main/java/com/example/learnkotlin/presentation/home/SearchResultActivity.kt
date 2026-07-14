@@ -3,10 +3,15 @@ package com.example.learnkotlin.presentation.home
 import android.view.View
 import android.widget.ListPopupWindow
 import androidx.activity.viewModels
+import androidx.core.view.isVisible
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.learnkotlin.R
+import com.example.learnkotlin.core.extensions.setSafeOnClick
 import com.example.learnkotlin.databinding.ActivitySearchResultBinding
 import com.example.learnkotlin.domain.base.Command
 import com.example.learnkotlin.domain.base.Event
 import com.example.learnkotlin.domain.base.customview.SearchInputView
+import com.example.learnkotlin.domain.model.home.LocationSearch
 import com.example.learnkotlin.domain.model.home.SearchLocation
 import com.example.learnkotlin.presentation.base.BaseActivity
 import com.example.learnkotlin.presentation.base.baseDropdown.BaseDropdownAdapter
@@ -23,20 +28,69 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
     private lateinit var popupDestination: ListPopupWindow
     private lateinit var adapterDestination: BaseDropdownAdapter<SearchLocation>
 
+    private val adapter = SuggestRouteAdapter(object : SuggestRouteAdapter.Listener {
+
+        override fun onRouteClick(item: SuggestRouteItem) {
+
+            // mở Route Detail
+        }
+    })
+
+    private val adapterArrival = NearbyArrivalAdapter(
+        object : NearbyArrivalAdapter.Listener {
+
+            override fun onArrivalClick(item: NearbyArrivalItem) {
+
+                // mở màn chi tiết xe
+            }
+        }
+    )
+
     override fun inflateBinding(): ActivitySearchResultBinding =
         ActivitySearchResultBinding.inflate(layoutInflater)
 
     override fun onInit() {
+        val locationSearch = navData as? LocationSearch
+        // Cập nhật dữ liệu từ navData vào ViewModel trước
+        locationSearch?.let {
+            sendCommand(HomeCommand.SelectCurrentLocation(it.selectedCurrentLocation?.name ?: "", it.selectedCurrentLocation))
+            sendCommand(HomeCommand.SelectDestination(it.selectedDestination?.name ?: "", it.selectedDestination))
+        }
         initView()
         initPopup()
         initAction()
         observeState()
+        sendCommand(HomeCommand.GetSuggestRoutes(navData as? LocationSearch))
     }
+
     private fun initView() {
+        displayViewWithTab()
         binding.lnFindRoute.setEnabledWithAlpha(
             !viewModel.state.value.selectedCurrentLocation?.name.isNullOrBlank(),
             !viewModel.state.value.selectedDestination?.name.isNullOrBlank(),
         )
+        binding.rvSuggestedRoutes.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = this@SearchResultActivity.adapter
+        }
+
+        binding.rvArrivingBuses.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = this@SearchResultActivity.adapterArrival
+        }
+
+    }
+
+    private fun displayViewWithTab() {
+        if (viewModel.tabRoute == TabRoute.SUGGEST) {
+            binding.rvSuggestedRoutes.isVisible = true
+            binding.rvArrivingBuses.isVisible = false
+            binding.tvArrivingYourStop.isVisible = false
+        } else {
+            binding.rvSuggestedRoutes.isVisible = false
+            binding.rvArrivingBuses.isVisible = true
+            binding.tvArrivingYourStop.isVisible = true
+        }
     }
 
     private fun observeState() {
@@ -93,6 +147,28 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
             { HomeCommand.SearchKeyDestination(it) }
         )
 
+        binding.segment.setOnTabSelectedListener {
+            if (it == 0) {
+                viewModel.tabRoute = TabRoute.SUGGEST
+                sendCommand(HomeCommand.GetSuggestRoutes(navData as? LocationSearch))
+            } else {
+                viewModel.tabRoute = TabRoute.ARRIVING
+                sendCommand(HomeCommand.GetNearbyRoutes(navData as? LocationSearch))
+            }
+            displayViewWithTab()
+
+        }
+        binding.lnFindRoute.setSafeOnClick {
+            displayViewWithTab()
+            if (viewModel.tabRoute == TabRoute.SUGGEST) {
+                sendCommand(HomeCommand.GetSuggestRoutes(navData as? LocationSearch))
+            } else {
+                sendCommand(HomeCommand.GetNearbyRoutes(navData as? LocationSearch))
+            }
+        }
+        binding.imBack.setSafeOnClick {
+            onBackPressedDispatcher.onBackPressed()
+        }
     }
 
     private fun bindSearchBar(
@@ -199,6 +275,38 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
                     viewModel.state.value.selectedDestination,
                     event.data
                 )
+            }
+
+            is HomeEvent.GetSuggestRoutesSuccess -> {
+                if (event.data?.routeItems.isNullOrEmpty()) {
+                    binding.tvEmptyView.isVisible = true
+                    binding.tvEmptyView.text = getString(R.string.no_routes_found)
+                    binding.tvArrivingYourStop.isVisible = false
+                    binding.rvSuggestedRoutes.isVisible = false
+                    binding.rvArrivingBuses.isVisible = false
+                } else {
+                    binding.tvEmptyView.isVisible = false
+                    binding.rvSuggestedRoutes.isVisible = true
+                    binding.rvArrivingBuses.isVisible = false
+                    binding.tvArrivingYourStop.isVisible = false
+                    adapter.submitList(event.data.routeItems)
+                }
+            }
+
+            is HomeEvent.GetNearbyArrivalsSuccess -> {
+                if (event.data?.listNearbyArrivalItem.isNullOrEmpty()) {
+                    binding.tvEmptyView.isVisible = true
+                    binding.tvEmptyView.text = getString(R.string.no_buses_found)
+                    binding.tvArrivingYourStop.isVisible = false
+                    binding.rvSuggestedRoutes.isVisible = false
+                    binding.rvArrivingBuses.isVisible = false
+                } else {
+                    binding.tvEmptyView.isVisible = false
+                    binding.rvSuggestedRoutes.isVisible = false
+                    binding.rvArrivingBuses.isVisible = true
+                    binding.tvArrivingYourStop.isVisible = true
+                    adapterArrival.submitList(event.data.listNearbyArrivalItem)
+                }
             }
 
             else -> { /* To do*/

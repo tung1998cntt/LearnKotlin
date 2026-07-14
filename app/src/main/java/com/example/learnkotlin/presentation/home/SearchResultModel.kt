@@ -1,6 +1,7 @@
 package com.example.learnkotlin.presentation.home
 
 import androidx.lifecycle.viewModelScope
+import com.example.learnkotlin.core.network.ApiResult
 import com.example.learnkotlin.domain.base.Command
 import com.example.learnkotlin.domain.base.Event
 import com.example.learnkotlin.domain.model.home.NearbyArrivalRequest
@@ -21,6 +22,8 @@ class SearchResultModel @Inject constructor(
 
     private var currentSearchJob: Job? = null
     private var destinationSearchJob: Job? = null
+
+    var tabRoute: TabRoute = TabRoute.SUGGEST
 
     private companion object {
         const val SEARCH_DEBOUNCE = 300L
@@ -109,6 +112,32 @@ class SearchResultModel @Inject constructor(
                 }
             }
 
+            is HomeCommand.GetSuggestRoutes -> {
+                val from = command.locationSearch?.selectedCurrentLocation
+                val to = command.locationSearch?.selectedDestination
+
+                // Cập nhật state để Activity có thể nhận được qua observer
+                updateState {
+                    copy(
+                        currentKeyword = from?.name.orEmpty(),
+                        selectedCurrentLocation = from,
+                        destinationKeyword = to?.name.orEmpty(),
+                        selectedDestination = to
+                    )
+                }
+
+                if (from != null && to != null) {
+                    getSuggestRoutes(from, to)
+                }
+            }
+
+            is HomeCommand.GetNearbyRoutes -> {
+                val from = command.locationSearch?.selectedCurrentLocation
+                if (from != null) {
+                    getNearbyArrivals(from)
+                }
+            }
+
             else -> super.handleCommand(command)
         }
     }
@@ -155,53 +184,71 @@ class SearchResultModel @Inject constructor(
         from: SearchLocation,
         to: SearchLocation
     ) {
-        viewModelScope.launch {
-            val request = RoutePlanRequest(
+        launchWithLoading(
+            showLoading = true,
+            block = {
+                val request = RoutePlanRequest(
                 fromLat = from.latitude ?: 0.0,
                 fromLon = from.longitude ?: 0.0,
                 toLat = to.latitude ?: 0.0,
                 toLon = to.longitude ?: 0.0
             )
-            execute(
-                block = {
-                    homeUseCase.getSuggestRoutes(request)
-                },
-                onSuccess = { routePlan ->
-                    /* To do*/
-                },
-                onError = { throwable ->
-                    sendEvent(
-                        HomeEvent.ShowError(
-                            throwable.message ?: "Unknown error"
+//                val request = RoutePlanRequest(
+//                    fromLat = 5.824683700032168,
+//                    fromLon = -55.154445192050275,
+//                    toLat = 5.830925943635606,
+//                    toLon = -55.140309563639505
+//                )
+                when (val result =  homeUseCase.getSuggestRoutes(request)) {
+                    is ApiResult.Success -> {
+                        sendEvent(HomeEvent.GetSuggestRoutesSuccess(result.data))
+                    }
+
+                    is ApiResult.Error -> {
+                        sendEvent(
+                            HomeEvent.ShowError(
+                                result.message ?: "Unknown error"
+                            )
                         )
-                    )
-
+                    }
                 }
-            )
-        }
-
+            },
+            customErrorHandler = null
+        )
     }
 
-    private fun getNearbyArrivals(
-        request: NearbyArrivalRequest
-    ) {
-        viewModelScope.launch {
-            execute(
-                block = {
-                    homeUseCase.getNearbyArrivals(request)
-                },
-                onSuccess = { nearbyArrival ->
-                    /* To do*/
-                },
-                onError = {
-                    sendEvent(
-                        HomeEvent.ShowError(
-                            it.message ?: "Unknown error"
+    private fun getNearbyArrivals(selectedCurrentLocation: SearchLocation? = null) {
+        launchWithLoading(
+            showLoading = true,
+            block = {
+                val request = NearbyArrivalRequest(
+                    lat = selectedCurrentLocation?.latitude ?: 0.0,
+                    lon = selectedCurrentLocation?.longitude ?: 0.0,
+                    radiusMeters = 2000,
+                    limit = 30
+                )
+//                val request = NearbyArrivalRequest(
+//                    lat = 5.824683700032168,
+//                    lon = -55.154445192050275,
+//                    radiusMeters = 2000,
+//                    limit = 30
+//                )
+                when (val result =  homeUseCase.getNearbyArrivals(request)) {
+                    is ApiResult.Success -> {
+                        sendEvent(HomeEvent.GetNearbyArrivalsSuccess(result.data))
+                    }
+
+                    is ApiResult.Error -> {
+                        sendEvent(
+                            HomeEvent.ShowError(
+                                result.message ?: "Unknown error"
+                            )
                         )
-                    )
+                    }
                 }
-            )
-        }
+            },
+            customErrorHandler = null
+        )
     }
 
 }

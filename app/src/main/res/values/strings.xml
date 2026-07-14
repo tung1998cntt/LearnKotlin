@@ -59,4 +59,6 @@
     <string name="tell_us_what_happened">Tell us what happened...</string>
     <string name="contact_title">Contact</string>
     <string name="email_or_phone">Email or phone</string>
+    <string name="no_routes_found">No routes found</string>
+    <string name="no_buses_found">No buses found</string>
 </resources>

@@ -6,6 +6,7 @@ import com.example.learnkotlin.domain.base.Command
 import com.example.learnkotlin.domain.base.Event
 import com.example.learnkotlin.domain.model.home.LoginRequest
 import com.example.learnkotlin.domain.model.home.NearbyArrivalRequest
+import com.example.learnkotlin.domain.model.home.RouteListRequest
 import com.example.learnkotlin.domain.model.home.RoutePlanRequest
 import com.example.learnkotlin.domain.model.home.SearchLocation
 import com.example.learnkotlin.domain.usecase.home.HomeUseCase
@@ -15,6 +16,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.collections.plus
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -211,31 +213,37 @@ class HomeViewModel @Inject constructor(
         from: SearchLocation,
         to: SearchLocation
     ) {
-        viewModelScope.launch {
-            val request = RoutePlanRequest(
-                fromLat = from.latitude ?: 0.0,
-                fromLon = from.longitude ?: 0.0,
-                toLat = to.latitude ?: 0.0,
-                toLon = to.longitude ?: 0.0
-            )
-            execute(
-                block = {
-                    homeUseCase.getSuggestRoutes(request)
-                },
-                onSuccess = { routePlan ->
-                    /* To do*/
-                },
-                onError = { throwable ->
-                    sendEvent(
-                        HomeEvent.ShowError(
-                            throwable.message ?: "Unknown error"
+        launchWithLoading(
+            showLoading = true,
+            block = {
+                //            val request = RoutePlanRequest(
+//                fromLat = from.latitude ?: 0.0,
+//                fromLon = from.longitude ?: 0.0,
+//                toLat = to.latitude ?: 0.0,
+//                toLon = to.longitude ?: 0.0
+//            )
+                val request = RoutePlanRequest(
+                    fromLat = 5.824683700032168,
+                    fromLon = -55.154445192050275,
+                    toLat = 5.830925943635606,
+                    toLon = -55.140309563639505
+                )
+                when (val result =  homeUseCase.getSuggestRoutes(request)) {
+                    is ApiResult.Success -> {
+                        sendEvent(HomeEvent.GetSuggestRoutesSuccess(result.data))
+                    }
+
+                    is ApiResult.Error -> {
+                        sendEvent(
+                            HomeEvent.ShowError(
+                                result.message ?: "Unknown error"
+                            )
                         )
-                    )
-
+                    }
                 }
-            )
-        }
-
+            },
+            customErrorHandler = null
+        )
     }
 
     private fun getNearbyArrivals(

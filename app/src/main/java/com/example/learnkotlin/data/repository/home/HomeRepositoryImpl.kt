@@ -10,6 +10,7 @@ import com.example.learnkotlin.core.extensions.safeApiCallNotBase
 import com.example.learnkotlin.core.network.ApiResult
 import com.example.learnkotlin.core.network.ApiService
 import com.example.learnkotlin.core.network.GeocodingApi
+import com.example.learnkotlin.core.network.PlanApiService
 import com.example.learnkotlin.core.secure.SecureSharedPrefs
 import com.example.learnkotlin.data.mapper.home.NearbyArrivalMapper
 import com.example.learnkotlin.data.mapper.home.NearbyArrivalRequestMapper
@@ -52,6 +53,7 @@ class HomeRepositoryImpl @Inject constructor(
     private val context: Context,
     private val geocodingApi: GeocodingApi,
     private val apiService: ApiService,
+    private val planApiService: PlanApiService,
     private val mapper: SearchLocationMapper,
     private val routePlanMapper: RoutePlanMapper,
     private val nearbyArrivalRequestMapper: NearbyArrivalRequestMapper,
@@ -150,23 +152,41 @@ class HomeRepositoryImpl @Inject constructor(
 
     override suspend fun getSuggestRoutes(
         request: RoutePlanRequest
-    ): RoutePlan {
+    ): ApiResult<RoutePlan> {
+        val result = safeApiCallNotBase {
+            planApiService.getSuggestRoutes(
+                fromLat = request.fromLat,
+                fromLon = request.fromLon,
+                toLat = request.toLat,
+                toLon = request.toLon
+            )
+        }
 
-        return apiService.getSuggestRoutes(
-            fromLat = request.fromLat,
-            fromLon = request.fromLon,
-            toLat = request.toLat,
-            toLon = request.toLon
-        ).let(routePlanMapper::map)
+        return when (result) {
+            is ApiResult.Success ->
+                ApiResult.Success(routePlanMapper.map(result.data))
+            is ApiResult.Error ->
+                result
+        }
     }
 
     override suspend fun getNearbyArrivals(
         request: NearbyArrivalRequest
-    ): NearbyArrivalResponse {
+    ): ApiResult<NearbyArrivalResponse> {
 
-        return apiService.getNearbyArrivals(
-            nearbyArrivalRequestMapper.map(request)
-        ).let(nearbyArrivalMapper::map)
+        val result = safeApiCallNotBase {
+            planApiService.getNearbyArrivals(
+                nearbyArrivalRequestMapper.map(request)
+            )
+        }
+
+        return when (result) {
+            is ApiResult.Success ->
+                ApiResult.Success(nearbyArrivalMapper.map(result.data))
+            is ApiResult.Error ->
+                result
+        }
+
     }
 
     override suspend fun getRouteList(

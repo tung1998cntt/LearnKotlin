@@ -28,11 +28,11 @@ interface HomeRepository {
 
     suspend fun getSuggestRoutes(
         request: RoutePlanRequest
-    ): RoutePlan
+    ): ApiResult<RoutePlan>
 
     suspend fun getNearbyArrivals(
         request: NearbyArrivalRequest
-    ): NearbyArrivalResponse
+    ): ApiResult<NearbyArrivalResponse>
 
     suspend fun getRouteList(
         request: RouteListRequest

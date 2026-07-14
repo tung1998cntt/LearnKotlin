@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginTop="12dp"
+    android:background="@drawable/shape_suggest_route_16"
+    android:padding="16dp">
+
+    <ImageView
+        android:id="@+id/imgRoute"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_location_42"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/lnInfo"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/dimen_16dp"
+        android:orientation="vertical"
+        android:layout_marginEnd="@dimen/dimen_10dp"
+        app:layout_constraintBottom_toBottomOf="@id/imgRoute"
+        app:layout_constraintEnd_toStartOf="@id/tvTime"
+        app:layout_constraintStart_toEndOf="@id/imgRoute"
+        app:layout_constraintTop_toTopOf="@id/imgRoute">
+
+        <TextView
+            android:id="@+id/tvRouteName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/color_001737"
+            android:textSize="@dimen/dimen_15sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textStyle="bold"
+            tools:text="Paramaribo Centrum - Lelydorp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_clock_18" />
+
+            <TextView
+                android:id="@+id/tvBusTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen_6dp"
+                android:text="24 min"
+                android:textColor="@color/color_7A7A7A"
+                android:textSize="@dimen/dimen_13sp" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_6dp"
+                android:src="@drawable/ic_ellipse_150" />
+
+            <TextView
+                android:id="@+id/tvWalkTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="3 min walk"
+                android:textColor="@color/color_7A7A7A"
+                android:textSize="@dimen/dimen_13sp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/dimen_10dp"
+        android:text="6 min"
+        android:textStyle="bold"
+        android:visibility="gone"
+        android:textColor="@color/color_EE0033"
+        android:textSize="@dimen/dimen_15sp"
+        app:layout_constraintBottom_toBottomOf="@id/imgRoute"
+        app:layout_constraintEnd_toStartOf="@+id/imgNext"
+        app:layout_constraintTop_toTopOf="@id/imgRoute" />
+
+    <ImageView
+        android:id="@+id/imgNext"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_next_24"
+        app:layout_constraintBottom_toBottomOf="@id/imgRoute"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/imgRoute" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
