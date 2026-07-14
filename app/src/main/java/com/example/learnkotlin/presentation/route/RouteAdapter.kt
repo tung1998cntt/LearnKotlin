@@ -43,8 +43,7 @@ class RouteAdapter(
 
             binding.tvRouteName.text = item.routeName
             binding.tvPrice.text = "SRD 8"
-            binding.tvDistance.text =
-                "Outbound : ${item.outboundDistance}"
+            binding.tvDistance.text = binding.root.context.getString(R.string.km_value, item.outboundDistance)
             binding.tvFrequency.text = binding.root.context.getString(R.string.every_s_min, "15")
             binding.tvStops.text = "8 Stops"
             binding.tvStartEnd.text = "CHM Building - Hermitageweg"

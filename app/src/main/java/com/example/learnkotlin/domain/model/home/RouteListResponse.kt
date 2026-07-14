@@ -5,26 +5,26 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class RouteListResponse(
-    val total: Int,
-    val offset: Int,
-    val limit: Int,
-    val routes: List<RouteItem>
+    val total: Int = 0,
+    val offset: Int = 0,
+    val limit: Int = 30,
+    val routes: List<RouteItem>? = null
 ) : Parcelable
 
 @Parcelize
 data class RouteItem(
-    val id: String,
-    val routeName: String,
-    val orgId: String,
-    val orgName: String,
-    val outboundDistance: String,
-    val inboundDistance: String,
-    val status: String,
-    val createdAt: Long,
-    val updatedAt: Long,
-    val outboundStops: List<String>?,
-    val inboundStops: List<String>?,
-    val udPermission: Boolean,
-    val auxiliaryImei: String?,
-    val delayTime: Int
+    val id: String? = null,
+    val routeName: String? = null,
+    val orgId: String? = null,
+    val orgName: String? = null,
+    val outboundDistance: String? = null,
+    val inboundDistance: String? = null,
+    val status: String? = null,
+    val createdAt: Long = 0L,
+    val updatedAt: Long = 0L,
+    val outboundStops: List<String>? = null,
+    val inboundStops: List<String>? = null,
+    val udPermission: Boolean = false,
+    val auxiliaryImei: String? = null,
+    val delayTime: Int = 0
 ) : Parcelable

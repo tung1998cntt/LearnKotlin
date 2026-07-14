@@ -1,6 +1,8 @@
 package com.example.learnkotlin.presentation.route
 
+import android.content.Context
 import androidx.lifecycle.viewModelScope
+import com.example.learnkotlin.R
 import com.example.learnkotlin.core.network.ApiResult
 import com.example.learnkotlin.domain.base.Command
 import com.example.learnkotlin.domain.model.home.Area
@@ -14,6 +16,7 @@ import com.example.learnkotlin.presentation.base.BaseViewModel
 import com.example.learnkotlin.presentation.home.HomeCommand
 import com.example.learnkotlin.presentation.home.HomeEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -21,7 +24,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RouteViewModel @Inject constructor(
-    private val homeUseCase: HomeUseCase
+    private val homeUseCase: HomeUseCase,
+    @ApplicationContext private val context: Context
 ) : BaseViewModel<RouteState>() {
 
     private var offset = 0
@@ -122,9 +126,9 @@ class RouteViewModel @Inject constructor(
         items += RouteDetailItem.Summary(
             fare = "SRD 8", // lấy từ API nếu có
             distance = if (variant == Variant.OUTBOUND) {
-                "${response.outboundDistance} km"
+                context.getString(R.string.km_value, response.outboundDistance)
             } else {
-                "${response.inboundDistance} km"
+                context.getString(R.string.km_value, response.inboundDistance)
             },
             stopCount = stops?.size ?: 0
         )
@@ -134,9 +138,69 @@ class RouteViewModel @Inject constructor(
             selected = variant
         )
 
+
+
+//        val stopss = listOf(
+//
+//            RouteStop(
+//                stopName = "Stop 1",
+//                latitude = 21.0700,
+//                longitude = 105.8000,
+//                pathPoints = listOf(
+//                    RoutePoint(105.8000, 21.0700),
+//                    RoutePoint(105.8010, 21.0705),
+//                    RoutePoint(105.8020, 21.0710)
+//                )
+//            ),
+//
+//            RouteStop(
+//                stopName = "Stop 2",
+//                latitude = 21.0710,
+//                longitude = 105.8020,
+//                pathPoints = listOf(
+//                    RoutePoint(105.8020, 21.0710),
+//                    RoutePoint(105.8030, 21.0720),
+//                    RoutePoint(105.8040, 21.0730)
+//                )
+//            ),
+//
+//            RouteStop(
+//                stopName = "Stop 3",
+//                latitude = 21.0730,
+//                longitude = 105.8040,
+//                pathPoints = listOf(
+//                    RoutePoint(105.8040, 21.0730),
+//                    RoutePoint(105.8060, 21.0740),
+//                    RoutePoint(105.8080, 21.0750)
+//                )
+//            ),
+//
+//            RouteStop(
+//                stopName = "Stop 4",
+//                latitude = 21.0750,
+//                longitude = 105.8080,
+//                pathPoints = emptyList() // Stop cuối thường không có đoạn đi tiếp
+//            )
+//        )
         // 3. Map
         items += RouteDetailItem.Map(
-            points = stops?.flatMap { it.pathPoints ?: listOf()} ?: listOf(),
+            points =
+//                listOf(
+//                RoutePoint(105.8000, 21.0700),
+//                RoutePoint(105.8010, 21.0705),
+//                RoutePoint(105.8020, 21.0710),
+//                RoutePoint(105.8030, 21.0718),
+//                RoutePoint(105.8040, 21.0725),
+//                RoutePoint(105.8050, 21.0730),
+//                RoutePoint(105.8060, 21.0735),
+//                RoutePoint(105.8070, 21.0738),
+//                RoutePoint(105.8080, 21.0740),
+//                RoutePoint(105.8090, 21.0742),
+//                RoutePoint(105.8100, 21.0745),
+//                RoutePoint(105.8110, 21.0748),
+//                RoutePoint(105.8120, 21.0750),
+//            ),
+                stops?.flatMap { it.pathPoints ?: listOf()} ?: listOf(),
             stops = stops ?: listOf()
         )
 
@@ -306,12 +370,12 @@ class RouteViewModel @Inject constructor(
                         updateState {
                             val newRoutes =
                                 if (isLoadMore)
-                                    routes + result.data.routes
+                                    (routes + (result.data.routes ?: listOf()))
                                 else
                                     result.data.routes
                             copy(
-                                routes = newRoutes,
-                                hasNext = newRoutes.size < result.data.total,
+                                routes = newRoutes ?: listOf(),
+                                hasNext = (newRoutes?.size ?: 0) < result.data.total,
                                 loadingMore = false
                             )
                         }
@@ -332,7 +396,7 @@ class RouteViewModel @Inject constructor(
 
 
     private fun getRouteDetail(
-        id:String,
+        id:String? = null,
         variant:String
     ){
 
@@ -341,7 +405,7 @@ class RouteViewModel @Inject constructor(
             block = {
                 when(
                     val result = homeUseCase.getRouteDetail(
-                        id,
+                        id ?: "",
                         variant
                     )
                 ){

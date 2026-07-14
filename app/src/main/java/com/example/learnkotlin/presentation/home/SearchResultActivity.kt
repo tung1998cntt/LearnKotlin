@@ -216,7 +216,7 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
             }
         }
 
-        collectState<RouteState, List<RouteDetailItem>>(
+        collectState<HomeState, List<RouteDetailItem>>(
             selector = {
                 it.detailItems
             }

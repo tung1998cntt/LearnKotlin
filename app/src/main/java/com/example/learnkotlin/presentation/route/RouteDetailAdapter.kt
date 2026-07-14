@@ -1,10 +1,12 @@
 package com.example.learnkotlin.presentation.route
 
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.annotation.DrawableRes
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -22,6 +24,25 @@ import com.example.learnkotlin.domain.model.home.RouteStop
 import com.example.learnkotlin.domain.model.home.SegmentType
 import com.example.learnkotlin.domain.model.home.Variant
 import com.example.learnkotlin.presentation.base.customview.VerticalDashDrawable
+import org.maplibre.android.camera.CameraUpdateFactory
+import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.geometry.LatLngBounds
+import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.Style
+import org.maplibre.android.style.layers.LineLayer
+import org.maplibre.android.style.layers.Property
+import org.maplibre.android.style.layers.PropertyFactory.iconAllowOverlap
+import org.maplibre.android.style.layers.PropertyFactory.iconIgnorePlacement
+import org.maplibre.android.style.layers.PropertyFactory.iconImage
+import org.maplibre.android.style.layers.PropertyFactory.lineCap
+import org.maplibre.android.style.layers.PropertyFactory.lineColor
+import org.maplibre.android.style.layers.PropertyFactory.lineJoin
+import org.maplibre.android.style.layers.PropertyFactory.lineWidth
+import org.maplibre.android.style.layers.SymbolLayer
+import org.maplibre.android.style.sources.GeoJsonSource
+import org.maplibre.geojson.Feature
+import org.maplibre.geojson.LineString
+import org.maplibre.geojson.Point
 
 class RouteDetailAdapter(
     private val listener: Listener
@@ -230,7 +251,7 @@ class RouteDetailAdapter(
 
             binding.tvDistance.text = item.distance
 
-            binding.tvStops.text = item.stopCount.toString()
+            binding.tvStops.text = binding.root.context.getString(R.string.number_stop, item.stopCount.toString())
         }
     }
 
@@ -260,6 +281,26 @@ class RouteDetailAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         private var mapCreated = false
+        private var mapLibreMap: MapLibreMap? = null
+
+        init {
+            binding.mapView.setOnTouchListener { v, event ->
+
+                when (event.actionMasked) {
+                    MotionEvent.ACTION_DOWN,
+                    MotionEvent.ACTION_MOVE -> {
+                        v.parent.requestDisallowInterceptTouchEvent(true)
+                    }
+
+                    MotionEvent.ACTION_UP,
+                    MotionEvent.ACTION_CANCEL -> {
+                        v.parent.requestDisallowInterceptTouchEvent(false)
+                    }
+                }
+
+                false
+            }
+        }
 
         fun bind(item: RouteDetailItem.Map) {
 
@@ -270,16 +311,176 @@ class RouteDetailAdapter(
                 binding.mapView.onCreate(null)
 
                 binding.mapView.getMapAsync { map ->
+                    mapLibreMap = map
                     val styleUrl =
                         "https://api.maptiler.com/maps/streets-v2/style.json?key=${BuildConfig.MAPTILER_API_KEY}"
-                    map.setStyle(styleUrl)
+                    map.setStyle(styleUrl) { style ->
+                        renderMap(style, map, item)
+                    }
                     // draw route
                     // draw marker
 
                 }
+            } else {
+                mapLibreMap?.getStyle { style ->
+                    renderMap(style, mapLibreMap!!, item)
+                }
             }
         }
 
+        private fun renderMap(
+            style: Style,
+            map: MapLibreMap,
+            item: RouteDetailItem.Map
+        ) {
+            drawRoute(style, item)
+            addStartMarker(style, item)
+            addEndMarker(style, item)
+            moveCamera(map, item)
+        }
+
+
+        private fun drawRoute(
+            style: Style,
+            item: RouteDetailItem.Map
+        ) {
+            val points = item.stops
+                .flatMap { it.pathPoints.orEmpty() }
+
+            val feature = Feature.fromGeometry(
+                LineString.fromLngLats(
+                    points.map {
+                        Point.fromLngLat(it.longitude, it.latitude)
+                    }
+                )
+            )
+            val source = style.getSourceAs<GeoJsonSource>("route-source")
+            if (source == null) {
+                style.addSource(
+                    GeoJsonSource(
+                        "route-source",
+                        feature
+                    )
+                )
+                style.addLayer(
+                    LineLayer("route-layer", "route-source")
+                        .withProperties(
+                            lineColor("#1976D2"),
+                            lineWidth(5f),
+                            lineCap(Property.LINE_CAP_ROUND),
+                            lineJoin(Property.LINE_JOIN_ROUND)
+                        )
+                )
+            } else {
+                source.setGeoJson(feature)
+            }
+        }
+
+        private fun addStartMarker(
+            style: Style,
+            item: RouteDetailItem.Map
+        ) {
+
+            val first = item.stops.firstOrNull() ?: return
+
+            addMarker(
+                style = style,
+                id = "start",
+                latitude = first.latitude,
+                longitude = first.longitude,
+                drawable = R.drawable.ic_my_location
+            )
+        }
+
+        private fun addEndMarker(
+            style: Style,
+            item: RouteDetailItem.Map
+        ) {
+
+            val last = item.stops.lastOrNull() ?: return
+
+            addMarker(
+                style = style,
+                id = "end",
+                latitude = last.latitude,
+                longitude = last.longitude,
+                drawable = R.drawable.ic_marker_selected
+            )
+        }
+
+        private fun addMarker(
+            style: Style,
+            id: String,
+            latitude: Double,
+            longitude: Double,
+            @DrawableRes drawable: Int
+        ) {
+
+            val feature = Feature.fromGeometry(
+                Point.fromLngLat(
+                    longitude,
+                    latitude
+                )
+            )
+            val source = style.getSourceAs<GeoJsonSource>("${id}-source")
+            if (source == null) {
+                if (style.getImage(id) == null) {
+                    val bitmap = BitmapFactory.decodeResource(
+                        binding.root.resources,
+                        drawable
+                    )
+                    style.addImage(id, bitmap)
+                }
+                style.addSource(
+                    GeoJsonSource(
+                        "${id}-source",
+                        feature
+                    )
+                )
+                style.addLayer(
+                    SymbolLayer(
+                        "${id}-layer",
+                        "${id}-source"
+                    ).withProperties(
+                        iconImage(id),
+                        iconAllowOverlap(true),
+                        iconIgnorePlacement(true)
+                    )
+                )
+            } else {
+                // Chỉ cập nhật vị trí marker
+                source.setGeoJson(feature)
+            }
+        }
+
+        private fun moveCamera(
+            map: MapLibreMap,
+            item: RouteDetailItem.Map
+        ) {
+
+            val routePoints = item.stops
+                .flatMap { it.pathPoints.orEmpty() }
+
+            if (routePoints.isEmpty()) return
+
+            val builder = LatLngBounds.Builder()
+
+            routePoints.forEach {
+                builder.include(
+                    LatLng(
+                        it.latitude,
+                        it.longitude
+                    )
+                )
+            }
+
+            map.animateCamera(
+                CameraUpdateFactory.newLatLngBounds(
+                    builder.build(),
+                    80
+                )
+            )
+        }
         fun onStart() = binding.mapView.onStart()
 
         fun onResume() = binding.mapView.onResume()

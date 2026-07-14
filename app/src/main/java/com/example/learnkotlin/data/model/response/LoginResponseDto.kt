@@ -5,41 +5,41 @@ import com.google.gson.annotations.SerializedName
 data class LoginResponseDto(
 
     @SerializedName("token")
-    val token: String,
+    val token: String? = null,
 
     @SerializedName("expired_at")
-    val expiredAt: Long,
+    val expiredAt: Long = 0L,
 
     @SerializedName("device_token")
-    val deviceToken: String?,
+    val deviceToken: String? = null,
 
     @SerializedName("is_admin")
-    val isAdmin: Boolean,
+    val isAdmin: Boolean = false,
 
     @SerializedName("user_id")
-    val userId: String,
+    val userId: String? = null,
 
     @SerializedName("role_id")
-    val roleId: String,
+    val roleId: String? = null,
 
     @SerializedName("role_name")
-    val roleName: String,
+    val roleName: String? = null,
 
     @SerializedName("role_type")
-    val roleType: String,
+    val roleType: String? = null,
 
     @SerializedName("project_id")
-    val projectId: String,
+    val projectId: String? = null,
 
     @SerializedName("org_id")
-    val orgId: String?,
+    val orgId: String? = null,
 
     @SerializedName("name")
-    val name: String,
+    val name: String? = null,
 
     @SerializedName("phone")
-    val phone: String,
+    val phone: String? = null,
 
     @SerializedName("username")
-    val username: String
+    val username: String? = null
 )

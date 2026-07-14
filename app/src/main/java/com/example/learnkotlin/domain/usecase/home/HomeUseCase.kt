@@ -10,7 +10,6 @@ import com.example.learnkotlin.domain.model.home.RouteListResponse
 import com.example.learnkotlin.domain.model.home.RoutePlan
 import com.example.learnkotlin.domain.model.home.RoutePlanRequest
 import com.example.learnkotlin.domain.model.home.SearchLocation
-import com.example.learnkotlin.domain.model.user.User
 import com.example.learnkotlin.domain.repository.home.HomeRepository
 import java.text.Collator
 import java.util.Locale
@@ -24,12 +23,6 @@ class HomeUseCase @Inject constructor(
     private val collator = Collator.getInstance(Locale("vi", "VN")).apply {
         strength = Collator.PRIMARY
     }
-
-
-//    suspend fun loadUsers(): ApiResult<List<User>> {
-//        return homeRepository.getUsers()
-//    }
-//    suspend fun addUser(name: String): ApiResult<List<User>> = homeRepository.addUser(name)
 
     suspend fun searchLocation(keyword: String): List<SearchLocation> {
         return homeRepository.searchLocation(keyword)
@@ -82,7 +75,7 @@ class HomeUseCase @Inject constructor(
             is ApiResult.Success -> {
                 ApiResult.Success(
                     result.data.copy(
-                        routes = result.data.routes.sortedWith { a, b ->
+                        routes = result.data.routes?.sortedWith { a, b ->
                             collator.compare(
                                 a.routeName,
                                 b.routeName

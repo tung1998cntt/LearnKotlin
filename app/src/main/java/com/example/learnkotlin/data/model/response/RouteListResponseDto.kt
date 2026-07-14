@@ -20,44 +20,44 @@ data class RouteListResponseDto(
 data class RouteItemDto(
 
     @SerializedName("id")
-    val id: String,
+    val id: String? = null,
 
     @SerializedName("route_name")
-    val routeName: String,
+    val routeName: String? = null,
 
     @SerializedName("org_id")
-    val orgId: String,
+    val orgId: String? = null,
 
     @SerializedName("org_name")
-    val orgName: String,
+    val orgName: String? = null,
 
     @SerializedName("outbound_distance")
-    val outboundDistance: String,
+    val outboundDistance: String? = null,
 
     @SerializedName("inbound_distance")
-    val inboundDistance: String,
+    val inboundDistance: String? = null,
 
     @SerializedName("status")
-    val status: String,
+    val status: String? = null,
 
     @SerializedName("created_at")
-    val createdAt: Long,
+    val createdAt: Long = 0L,
 
     @SerializedName("updated_at")
-    val updatedAt: Long,
+    val updatedAt: Long= 0L,
 
     @SerializedName("outbound_stops")
-    val outboundStops: List<String>?,
+    val outboundStops: List<String>? = null,
 
     @SerializedName("inbound_stops")
-    val inboundStops: List<String>?,
+    val inboundStops: List<String>? = null,
 
     @SerializedName("ud_permission")
-    val udPermission: Boolean,
+    val udPermission: Boolean = false,
 
     @SerializedName("auxiliary_imei")
-    val auxiliaryImei: String?,
+    val auxiliaryImei: String? = null,
 
     @SerializedName("delay_time")
-    val delayTime: Int
+    val delayTime: Int = 0
 )

@@ -23,7 +23,7 @@
     <string name="search_by_route_name_or_stops_hint_text">Search by route name or stops</string>
     <string name="view_details_title_button">View details</string>
     <string name="every_s_min">Every %s min</string>
-    <string name="number_stop">%s Stops</string>
+    <string name="number_stop">%s stops</string>
     <string name="srd_s">SRD %s</string>
     <string name="fare_title">Fare</string>
     <string name="distance_title">Distance</string>
@@ -61,4 +61,6 @@
     <string name="email_or_phone">Email or phone</string>
     <string name="no_routes_found">No routes found</string>
     <string name="no_buses_found">No buses found</string>
+    <string name="km_value">%s km</string>
+    <string name="start_end_route">%s - %s</string>
 </resources>

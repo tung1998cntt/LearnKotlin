@@ -1,6 +1,8 @@
 package com.example.learnkotlin.presentation.home
 
+import android.content.Context
 import androidx.lifecycle.viewModelScope
+import com.example.learnkotlin.R
 import com.example.learnkotlin.core.network.ApiResult
 import com.example.learnkotlin.domain.base.Command
 import com.example.learnkotlin.domain.base.Event
@@ -14,6 +16,7 @@ import com.example.learnkotlin.domain.model.home.Variant
 import com.example.learnkotlin.domain.usecase.home.HomeUseCase
 import com.example.learnkotlin.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -22,7 +25,8 @@ import kotlin.collections.lastIndex
 
 @HiltViewModel
 class SearchResultModel @Inject constructor(
-    private val homeUseCase: HomeUseCase
+    private val homeUseCase: HomeUseCase,
+    @ApplicationContext private val context: Context
 ) : BaseViewModel<HomeState>() {
 
     private var currentSearchJob: Job? = null
@@ -148,7 +152,7 @@ class SearchResultModel @Inject constructor(
             is HomeCommand.GetRouteDetail -> {
 
                 getRouteDetail(
-                    command.routeId,
+                    command.routeId ?: "",
                     command.variant
                 )
 
@@ -359,9 +363,9 @@ class SearchResultModel @Inject constructor(
         items += RouteDetailItem.Summary(
             fare = "SRD 8", // lấy từ API nếu có
             distance = if (variant == Variant.OUTBOUND) {
-                "${response.outboundDistance} km"
+                context.getString(R.string.km_value, response.outboundDistance)
             } else {
-                "${response.inboundDistance} km"
+                context.getString(R.string.km_value, response.inboundDistance)
             },
             stopCount = stops?.size ?: 0
         )

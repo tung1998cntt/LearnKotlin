@@ -6,7 +6,6 @@ import com.example.learnkotlin.domain.base.Command
 import com.example.learnkotlin.domain.base.Event
 import com.example.learnkotlin.domain.model.home.LoginRequest
 import com.example.learnkotlin.domain.model.home.NearbyArrivalRequest
-import com.example.learnkotlin.domain.model.home.RouteListRequest
 import com.example.learnkotlin.domain.model.home.RoutePlanRequest
 import com.example.learnkotlin.domain.model.home.SearchLocation
 import com.example.learnkotlin.domain.usecase.home.HomeUseCase

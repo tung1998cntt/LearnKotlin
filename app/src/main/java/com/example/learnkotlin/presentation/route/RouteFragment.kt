@@ -7,6 +7,7 @@ import android.widget.LinearLayout
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.learnkotlin.R
 import com.example.learnkotlin.core.extensions.setSafeOnClick
 import com.example.learnkotlin.databinding.FragmentRouteBinding
 import com.example.learnkotlin.domain.model.home.Area
@@ -275,9 +276,17 @@ class RouteFragment : BaseFragment<FragmentRouteBinding>() {
                     "Every 15 min"
                 binding.tvDestination.text =
                     if (viewModel.state.value.variant == Variant.OUTBOUND)
-                        detail.outboundStops?.lastOrNull()?.stopName
-                    else
+                        requireContext().getString(
+                            R.string.start_end_route,
+                            detail.outboundStops?.firstOrNull()?.stopName,
+                            detail.outboundStops?.lastOrNull()?.stopName
+                        )
+                    else requireContext().getString(
+                        R.string.start_end_route,
+                        detail.inboundStops?.firstOrNull()?.stopName,
                         detail.inboundStops?.lastOrNull()?.stopName
+                    )
+
                 bottomSheetBehavior.state =
                     BottomSheetBehavior.STATE_EXPANDED
             }

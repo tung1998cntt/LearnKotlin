@@ -52,7 +52,7 @@ sealed class HomeCommand : Command {
     data class SearchRoute(val keyword: String) : HomeCommand()
 
     data class GetRouteDetail(
-        val routeId: String,
+        val routeId: String? = null,
         val variant: String = "outbound"
     ) : HomeCommand()
 
