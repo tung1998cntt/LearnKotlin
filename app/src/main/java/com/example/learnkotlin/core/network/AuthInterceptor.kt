@@ -9,19 +9,22 @@ import java.io.IOException
 class AuthInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val token = SecureSharedPrefs.get().getString(Tags.ACCESS_TOKEN)
+        val request = chain.request()
         
         return try {
-            val requestBuilder = chain.request().newBuilder()
+            val requestBuilder = request.newBuilder()
                 .addHeader("Content-Type", "application/json")
             
-            if (!token.isNullOrEmpty()) {
+            val isLoginRequest = request.url.encodedPath.endsWith("/api/app/vtracking/login")
+
+            if (!token.isNullOrEmpty() && !isLoginRequest) {
                 requestBuilder.header("Authorization", "Bearer $token")
             }
             requestBuilder.addHeader("AppKey", "CuUTtsmfjMBOKeMEpkAo")
             requestBuilder.addHeader("AppSecret", "Ga8lL0lMVFr6fJoudGgJR9upsXuIgGxz")
 
-            val request = requestBuilder.build()
-            val response = chain.proceed(request)
+            val newRequest = requestBuilder.build()
+            val response = chain.proceed(newRequest)
 
             // HTTP lỗi do server trả
             when (response.code) {

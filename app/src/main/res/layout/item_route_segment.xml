@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="@dimen/dimen_16dp"
+    android:layout_marginTop="@dimen/dimen_12dp"
+    android:orientation="horizontal"
+    android:weightSum="2">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvRouteInformation"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/dimen_8dp"
+        android:layout_weight="1"
+        android:background="@drawable/bg_route_segment_selector"
+        android:gravity="center"
+        android:paddingVertical="@dimen/dimen_8dp"
+        android:text="@string/route_information_tab_title"
+        android:textColor="@color/route_segment_text_selector"
+        android:textSize="@dimen/dimen_13sp"
+        android:textStyle="bold" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvBusStop"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/dimen_8dp"
+        android:layout_weight="1"
+        android:background="@drawable/bg_route_segment_selector"
+        android:gravity="center"
+        android:paddingVertical="@dimen/dimen_8dp"
+        android:text="@string/bus_stop_tab_title"
+        android:textColor="@color/route_segment_text_selector"
+        android:textSize="@dimen/dimen_13sp"
+        android:textStyle="bold" />
+
+</LinearLayout>

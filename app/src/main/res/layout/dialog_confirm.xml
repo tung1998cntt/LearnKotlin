@@ -8,51 +8,73 @@
     android:padding="20dp">
 
     <!-- Title -->
-    <TextView
+
+    <ImageView
+        android:id="@+id/icStatusDialog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="@dimen/dimen_14dp" />
+
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tvTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
+        android:textColor="@color/black"
         android:textSize="@dimen/dimen_20sp"
         android:textStyle="bold"
-        tools:text="Title" />
+        tools:text="Khởi động lại thiết bị?" />
 
     <!-- Message -->
-    <TextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tvMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/dimen_8dp"
         android:gravity="center"
-        android:textSize="@dimen/dimen_16sp"
-        tools:text="Message" />
+        android:lineSpacingExtra="@dimen/dimen_8sp"
+        android:textColor="@color/color_4B4B4B"
+        android:textSize="@dimen/dimen_15sp"
+        tools:text="Cho phép khởi động lại thiết bị ngay bây giờ. Bạn vẫn muốn tiếp tục ?" />
 
     <!-- Buttons container -->
     <LinearLayout
         style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/dimen_16dp"
+        android:layout_marginTop="@dimen/dimen_24dp"
         android:gravity="center"
         android:orientation="horizontal">
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnConfirmNo"
-            style="null"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/no_title" />
+            android:background="@drawable/bg_back"
+            android:minHeight="0dp"
+            android:paddingHorizontal="@dimen/dimen_8dp"
+            android:textAllCaps="false"
+            android:paddingVertical="@dimen/dimen_10dp"
+            android:text="@string/cancel_title"
+            android:textColor="@color/color_EE0033"
+            android:textStyle="bold" />
 
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnConfirmYes"
-            style="null"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/dimen_8dp"
             android:layout_weight="1"
-            android:text="@string/yes_title" />
+            android:background="@drawable/bg_btn_login"
+            android:minHeight="0dp"
+            android:textAllCaps="false"
+            android:paddingVertical="@dimen/dimen_10dp"
+            android:text="@string/submit_button"
+            android:textColor="@color/white"
+            android:textStyle="bold" />
 
     </LinearLayout>
 

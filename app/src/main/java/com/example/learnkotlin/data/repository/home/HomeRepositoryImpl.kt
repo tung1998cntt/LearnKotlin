@@ -19,18 +19,23 @@ import com.example.learnkotlin.data.model.request.LoginRequestDto
 import com.example.learnkotlin.data.model.request.RouteListRequestDto
 import com.example.learnkotlin.data.model.response.AreaDto
 import com.example.learnkotlin.data.model.response.LoginResponseDto
+import com.example.learnkotlin.data.model.response.RouteDetailResponseDto
 import com.example.learnkotlin.data.model.response.RouteItemDto
 import com.example.learnkotlin.data.model.response.RouteListResponseDto
+import com.example.learnkotlin.data.model.response.RouteStopDto
 import com.example.learnkotlin.domain.model.home.Area
 import com.example.learnkotlin.domain.model.home.LoginRequest
 import com.example.learnkotlin.domain.model.home.LoginResponse
 import com.example.learnkotlin.domain.model.home.NearbyArrivalRequest
 import com.example.learnkotlin.domain.model.home.NearbyArrivalResponse
+import com.example.learnkotlin.domain.model.home.RouteDetail
 import com.example.learnkotlin.domain.model.home.RouteItem
 import com.example.learnkotlin.domain.model.home.RouteListRequest
 import com.example.learnkotlin.domain.model.home.RouteListResponse
 import com.example.learnkotlin.domain.model.home.RoutePlan
 import com.example.learnkotlin.domain.model.home.RoutePlanRequest
+import com.example.learnkotlin.domain.model.home.RoutePoint
+import com.example.learnkotlin.domain.model.home.RouteStop
 import com.example.learnkotlin.domain.model.home.SearchLocation
 import com.example.learnkotlin.domain.repository.home.HomeRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -280,6 +285,90 @@ class HomeRepositoryImpl @Inject constructor(
             name = name,
             phone = phone,
             username = username
+        )
+
+    override suspend fun getRouteDetail(
+        id: String,
+        variant: String
+    ): ApiResult<RouteDetail> {
+        return when (
+            val result = safeApiCallNotBase {
+                apiService.getRouteDetail(
+                    id,
+                    variant
+                )
+            }
+        ) {
+            is ApiResult.Success ->
+                ApiResult.Success(
+                    result.data.toDomain()
+                )
+            is ApiResult.Error -> result
+        }
+    }
+
+
+    fun RouteDetailResponseDto.toDomain() =
+        RouteDetail(
+
+            id = id,
+
+            routeName = routeName,
+
+            orgId = orgId,
+
+            orgName = orgName,
+
+            outboundDistance = outboundDistance,
+
+            inboundDistance = inboundDistance,
+
+            status = status,
+
+            createdAt = createdAt,
+
+            updatedAt = updatedAt,
+
+            outboundStops = outboundStops?.map {
+                it.toDomain()
+            },
+
+            inboundStops = inboundStops?.map {
+                it.toDomain()
+            } ?: listOf() ,
+
+            udPermission = udPermission,
+
+            auxiliaryImei = auxiliaryImei,
+
+            delayTime = delayTime
+        )
+
+    fun RouteStopDto.toDomain() =
+        RouteStop(
+
+            id = id,
+
+            stopName = stopName,
+
+            latitude = latitude,
+
+            longitude = longitude,
+
+            notificationCode = notificationCode,
+
+            stopOrder = stopOrder,
+
+            pathPoints = pathPoints?.map {
+
+                RoutePoint(
+
+                    longitude = it[0],
+
+                    latitude = it[1]
+
+                )
+            } ?: listOf()
         )
 
 }

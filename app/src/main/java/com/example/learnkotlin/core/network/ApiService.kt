@@ -6,12 +6,14 @@ import com.example.learnkotlin.data.model.request.RouteListRequestDto
 import com.example.learnkotlin.data.model.response.AreaDto
 import com.example.learnkotlin.data.model.response.LoginResponseDto
 import com.example.learnkotlin.data.model.response.NearbyArrivalResponseDto
+import com.example.learnkotlin.data.model.response.RouteDetailResponseDto
 import com.example.learnkotlin.data.model.response.RouteListResponseDto
 import com.example.learnkotlin.data.model.response.RoutePlanResponseDto
 import com.example.learnkotlin.domain.model.user.User
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiService {
@@ -48,6 +50,15 @@ interface ApiService {
     suspend fun login(
         @Body body: LoginRequestDto
     ): LoginResponseDto
+
+
+    @GET("/api/devices/vtracking/vehicle/route/{id}")
+    suspend fun getRouteDetail(
+        @Path("id")
+        id:String,
+        @Query("variant")
+        variant:String
+    ): RouteDetailResponseDto
 
 
 }

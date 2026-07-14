@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="72dp">
+
+    <!-- line trên -->
+
+    <View
+        android:id="@+id/viewTop"
+        android:layout_width="@dimen/dimen_2dp"
+        android:layout_height="0dp"
+        android:background="@color/color_C8C7CC"
+        app:layout_constraintBottom_toTopOf="@id/lnPoint"
+        app:layout_constraintEnd_toEndOf="@id/lnPoint"
+        app:layout_constraintStart_toStartOf="@id/lnPoint"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- line dưới -->
+
+    <View
+        android:id="@+id/viewBottom"
+        android:layout_width="@dimen/dimen_2dp"
+        android:layout_height="0dp"
+        android:background="@color/color_C8C7CC"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/lnPoint"
+        app:layout_constraintStart_toStartOf="@id/lnPoint"
+        app:layout_constraintTop_toBottomOf="@id/lnPoint" />
+
+    <LinearLayout
+        android:id="@+id/lnPoint"
+        android:layout_width="@dimen/dimen_49dp"
+        android:layout_height="@dimen/dimen_53dp"
+        android:orientation="vertical"
+        android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="@dimen/dimen_34dp"
+        >
+        <ImageView
+            android:id="@+id/imgPoint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_stop_gray"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="@id/lnPoint"
+        app:layout_constraintEnd_toStartOf="@id/imgArrow"
+        app:layout_constraintStart_toEndOf="@id/lnPoint"
+        app:layout_constraintTop_toTopOf="@id/lnPoint">
+
+        <TextView
+            android:id="@+id/tvName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/color_4B4B4B"
+            android:textSize="@dimen/dimen_15sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvDistance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimen_4dp"
+            android:textColor="@color/color_7A7A7A"
+            android:textSize="@dimen/dimen_13sp" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/imgArrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@null"
+        android:layout_marginEnd="@dimen/dimen_20dp"
+        android:src="@drawable/ic_next_24"
+        app:layout_constraintBottom_toBottomOf="@id/lnPoint"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/lnPoint" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

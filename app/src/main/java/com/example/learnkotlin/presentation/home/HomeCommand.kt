@@ -3,6 +3,8 @@ package com.example.learnkotlin.presentation.home
 import com.example.learnkotlin.domain.base.Command
 import com.example.learnkotlin.domain.model.home.Area
 import com.example.learnkotlin.domain.model.home.SearchLocation
+import com.example.learnkotlin.domain.model.home.SegmentType
+import com.example.learnkotlin.domain.model.home.Variant
 
 sealed class HomeCommand : Command {
 
@@ -46,5 +48,19 @@ sealed class HomeCommand : Command {
     ) : HomeCommand()
 
     data class SearchRoute(val keyword: String) : HomeCommand()
+
+    data class GetRouteDetail(
+        val routeId: String,
+        val variant: String = "outbound"
+    ) : HomeCommand()
+
+    data class ChangeVariant(
+        val variant: Variant
+    ) : HomeCommand()
+
+    data class ChangeSegment(
+        val segment: SegmentType
+    ) : HomeCommand()
+
 
 }

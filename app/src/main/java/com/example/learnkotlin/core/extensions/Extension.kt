@@ -1,5 +1,7 @@
 package com.example.learnkotlin.core.extensions
 
+import android.content.Context
+import android.util.TypedValue
 import android.view.View
 import com.example.learnkotlin.core.network.ApiException
 import com.example.learnkotlin.core.network.ApiResult
@@ -46,4 +48,12 @@ fun View.setSafeOnClick(interval: Long = 600L, onClick: (View) -> Unit) {
             onClick(v)
         }
     }
+}
+
+fun Int.dpToPx(context: Context): Int {
+    return TypedValue.applyDimension(
+        TypedValue.COMPLEX_UNIT_DIP,
+        this.toFloat(),
+        context.resources.displayMetrics
+    ).toInt()
 }

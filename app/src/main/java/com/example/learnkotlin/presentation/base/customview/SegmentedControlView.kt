@@ -70,7 +70,7 @@ class SegmentedControlView @JvmOverloads constructor(
             binding.cardBackground.setCardBackgroundColor(
                 getColor(
                     R.styleable.SegmentedControlView_segmentBackgroundColor,
-                    Color.parseColor("#E5E5E5")
+                    Color.parseColor("#29A8AAAE")
                 )
             )
 
@@ -90,14 +90,16 @@ class SegmentedControlView @JvmOverloads constructor(
         }
     }
 
-    fun select(index: Int) {
+    fun setSelected(index: Int) {
+        selectedIndex = index
+        update(false)
+    }
 
+    fun select(index: Int) {
         if (selectedIndex == index) return
 
         selectedIndex = index
-
         update(true)
-
         listener?.invoke(index)
     }
 
@@ -114,14 +116,24 @@ class SegmentedControlView @JvmOverloads constructor(
 
     private fun update(animate: Boolean) {
 
+        val margin = dp(4)
+
         val tabWidth = width / 2f
 
-        binding.cardIndicator.layoutParams.width =
-            (tabWidth - dp(8)).toInt()
+        val indicatorWidth = tabWidth - margin * 2
+
+        binding.cardIndicator.layoutParams =
+            binding.cardIndicator.layoutParams.apply {
+                width = indicatorWidth.toInt()
+            }
 
         binding.cardIndicator.requestLayout()
 
-        val target = tabWidth * selectedIndex
+        val target =
+            if (selectedIndex == 0)
+                margin
+            else
+                tabWidth + margin
 
         if (animate) {
             binding.cardIndicator.animate()
@@ -133,11 +145,17 @@ class SegmentedControlView @JvmOverloads constructor(
         }
 
         binding.tvLeft.setTextColor(
-            if (selectedIndex == 0) selectedColor else normalColor
+            if (selectedIndex == 0)
+                selectedColor
+            else
+                normalColor
         )
 
         binding.tvRight.setTextColor(
-            if (selectedIndex == 1) selectedColor else normalColor
+            if (selectedIndex == 1)
+                selectedColor
+            else
+                normalColor
         )
     }
 

@@ -90,4 +90,9 @@ class HomeUseCase @Inject constructor(
         return homeRepository.login(request)
     }
 
+    suspend fun getRouteDetail(
+        id: String,
+        variant: String
+    ) = homeRepository.getRouteDetail(id, variant)
+
 }

@@ -18,7 +18,6 @@ sealed class HomeEvent : Event {
         val data: List<SearchLocation>? = null
     ) : HomeEvent()
 
-    data class GetRouteSuccess(
-        val listRoute: List<RouteItem>? = null
-    ) : HomeEvent()
+    object OpenRouteDetail : HomeEvent()
+
 }

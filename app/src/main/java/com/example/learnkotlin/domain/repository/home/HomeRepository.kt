@@ -6,6 +6,7 @@ import com.example.learnkotlin.domain.model.home.LoginRequest
 import com.example.learnkotlin.domain.model.home.LoginResponse
 import com.example.learnkotlin.domain.model.home.NearbyArrivalRequest
 import com.example.learnkotlin.domain.model.home.NearbyArrivalResponse
+import com.example.learnkotlin.domain.model.home.RouteDetail
 import com.example.learnkotlin.domain.model.home.RouteListRequest
 import com.example.learnkotlin.domain.model.home.RouteListResponse
 import com.example.learnkotlin.domain.model.home.RoutePlan
@@ -42,5 +43,10 @@ interface HomeRepository {
     suspend fun login(
         request: LoginRequest
     ): ApiResult<LoginResponse>
+
+     suspend fun getRouteDetail(
+        id:String,
+        variant:String
+    ):ApiResult<RouteDetail>
 
 }

@@ -49,6 +49,8 @@ abstract class BaseDialogFragment<VB : ViewBinding> : DialogFragment() {
     override fun onStart() {
         super.onStart()
         dialog?.window?.apply {
+            // Set window background to transparent to show the layout's rounded corners
+            setBackgroundDrawableResource(android.R.color.transparent)
             setLayout(dialogWidth, dialogHeight)
             dialogAnimation?.let { setWindowAnimations(it) }
         }

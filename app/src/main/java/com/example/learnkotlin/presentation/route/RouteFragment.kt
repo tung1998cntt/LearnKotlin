@@ -1,18 +1,25 @@
 package com.example.learnkotlin.presentation.route
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.learnkotlin.core.extensions.setSafeOnClick
 import com.example.learnkotlin.databinding.FragmentRouteBinding
 import com.example.learnkotlin.domain.model.home.Area
+import com.example.learnkotlin.domain.model.home.RouteDetailItem
 import com.example.learnkotlin.domain.model.home.RouteItem
+import com.example.learnkotlin.domain.model.home.RouteStop
+import com.example.learnkotlin.domain.model.home.SegmentType
+import com.example.learnkotlin.domain.model.home.Variant
 import com.example.learnkotlin.presentation.base.BaseFragment
 import com.example.learnkotlin.presentation.base.UiEvent
 import com.example.learnkotlin.presentation.home.HomeCommand
 import com.example.learnkotlin.presentation.home.HomeEvent
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -21,9 +28,11 @@ class RouteFragment : BaseFragment<FragmentRouteBinding>() {
     override val viewModel: RouteViewModel by viewModels()
     private val adapter by lazy {
         RouteAdapter { route ->
-
-            // click detail
-
+            sendCommand(
+                HomeCommand.GetRouteDetail(
+                    route.id
+                )
+            )
         }
     }
 
@@ -35,6 +44,61 @@ class RouteFragment : BaseFragment<FragmentRouteBinding>() {
         }
     }
 
+    private val detailAdapter by lazy {
+
+        RouteDetailAdapter(
+
+            object : RouteDetailAdapter.Listener {
+
+                override fun onOutboundClick() {
+
+                    sendCommand(
+
+                        HomeCommand.ChangeVariant(
+                            Variant.OUTBOUND
+                        )
+                    )
+                }
+
+                override fun onInboundClick() {
+
+                    sendCommand(
+
+                        HomeCommand.ChangeVariant(
+                            Variant.INBOUND
+                        )
+                    )
+                }
+
+                override fun onRouteInformationClick() {
+
+                    sendCommand(
+
+                        HomeCommand.ChangeSegment(
+                            SegmentType.ROUTE_INFORMATION
+                        )
+                    )
+                }
+
+                override fun onBusStopClick() {
+
+                    sendCommand(
+
+                        HomeCommand.ChangeSegment(
+                            SegmentType.BUS_STOP
+                        )
+                    )
+                }
+
+                override fun onStopClick(stop: RouteStop) {
+
+                }
+            }
+        )
+    }
+
+    private lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
+
     override fun inflateBinding(
         inflater: LayoutInflater,
         container: ViewGroup?
@@ -43,6 +107,7 @@ class RouteFragment : BaseFragment<FragmentRouteBinding>() {
     }
 
     override fun onInit() {
+        initBottomSheet()
         initRecyclerView()
         sendCommand(HomeCommand.GetArea)
         sendCommand(HomeCommand.GetRoute)
@@ -62,6 +127,39 @@ class RouteFragment : BaseFragment<FragmentRouteBinding>() {
         binding.imBack.setSafeOnClick {
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
+
+        binding.imgClose.setSafeOnClick {
+
+            bottomSheetBehavior.state =
+                BottomSheetBehavior.STATE_HIDDEN
+        }
+
+        bottomSheetBehavior.addBottomSheetCallback(
+            object : BottomSheetBehavior.BottomSheetCallback() {
+
+                override fun onStateChanged(bottomSheet: View, newState: Int) {
+
+                    when (newState) {
+                        BottomSheetBehavior.STATE_EXPANDED -> {
+                            binding.viewScrim.visibility = View.VISIBLE
+                        }
+
+                        BottomSheetBehavior.STATE_HIDDEN -> {
+                            binding.viewScrim.visibility = View.GONE
+                        }
+                    }
+                }
+
+                override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                    binding.viewScrim.alpha = slideOffset.coerceIn(0f, 1f)
+                }
+            }
+        )
+
+        binding.viewScrim.setOnClickListener {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        }
+
     }
 
     private fun observeState() {
@@ -75,6 +173,31 @@ class RouteFragment : BaseFragment<FragmentRouteBinding>() {
             selector = { it.areas }
         ) {
             areaAdapter.submitList(it)
+        }
+        collectState<RouteState, List<RouteDetailItem>>(
+            selector = {
+                it.detailItems
+            }
+        ) {
+            detailAdapter.submitList(it)
+        }
+    }
+
+    private fun initBottomSheet() {
+
+        bottomSheetBehavior = BottomSheetBehavior.from(binding.layoutBottomSheet)
+
+        val height = (resources.displayMetrics.heightPixels * 0.85f).toInt()
+
+        binding.layoutBottomSheet.layoutParams.height = height
+
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+
+        bottomSheetBehavior.skipCollapsed = true
+
+        bottomSheetBehavior.isHideable = true
+        binding.layoutBottomSheet.post {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         }
     }
 
@@ -91,6 +214,11 @@ class RouteFragment : BaseFragment<FragmentRouteBinding>() {
                 false
             )
             adapter = areaAdapter
+        }
+        binding.rvRouteDetail.apply {
+            layoutManager =
+                LinearLayoutManager(requireContext())
+            adapter = detailAdapter
         }
         addLoadMore()
     }
@@ -131,15 +259,59 @@ class RouteFragment : BaseFragment<FragmentRouteBinding>() {
 
     override fun handleEvent(event: Any) {
         when (event) {
-            is HomeEvent.GetRouteSuccess -> {
-
-            }
 
             is UiEvent.Error -> {
                 showErrorDialog(event.message, onConfirm = {
 
                 })
             }
+
+            is HomeEvent.OpenRouteDetail -> {
+                val detail =
+                    viewModel.state.value.routeDetail ?: return
+                binding.tvRouteName.text =
+                    detail.routeName
+                binding.tvFrequency.text =
+                    "Every 15 min"
+                binding.tvDestination.text =
+                    if (viewModel.state.value.variant == Variant.OUTBOUND)
+                        detail.outboundStops?.lastOrNull()?.stopName
+                    else
+                        detail.inboundStops?.lastOrNull()?.stopName
+                bottomSheetBehavior.state =
+                    BottomSheetBehavior.STATE_EXPANDED
+            }
+
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        detailAdapter.onStart()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        detailAdapter.onResume()
+    }
+
+    override fun onPause() {
+        detailAdapter.onPause()
+        super.onPause()
+    }
+
+    override fun onStop() {
+        detailAdapter.onStop()
+        super.onStop()
+    }
+
+    override fun onDestroyView() {
+        detailAdapter.onDestroy()
+        super.onDestroyView()
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        detailAdapter.onLowMemory()
     }
 }
