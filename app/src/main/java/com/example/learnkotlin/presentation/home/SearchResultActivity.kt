@@ -1,6 +1,7 @@
 package com.example.learnkotlin.presentation.home
 
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.ListPopupWindow
 import androidx.activity.viewModels
 import androidx.core.view.isVisible
@@ -12,9 +13,17 @@ import com.example.learnkotlin.domain.base.Command
 import com.example.learnkotlin.domain.base.Event
 import com.example.learnkotlin.domain.base.customview.SearchInputView
 import com.example.learnkotlin.domain.model.home.LocationSearch
+import com.example.learnkotlin.domain.model.home.RouteDetailItem
+import com.example.learnkotlin.domain.model.home.RouteStop
 import com.example.learnkotlin.domain.model.home.SearchLocation
+import com.example.learnkotlin.domain.model.home.SegmentType
+import com.example.learnkotlin.domain.model.home.Variant
 import com.example.learnkotlin.presentation.base.BaseActivity
+import com.example.learnkotlin.presentation.base.UiEvent
 import com.example.learnkotlin.presentation.base.baseDropdown.BaseDropdownAdapter
+import com.example.learnkotlin.presentation.route.RouteDetailAdapter
+import com.example.learnkotlin.presentation.route.RouteState
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -32,7 +41,11 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
 
         override fun onRouteClick(item: SuggestRouteItem) {
 
-            // mở Route Detail
+            sendCommand(
+                HomeCommand.GetRouteDetail(
+                    item.routeId
+                )
+            )
         }
     })
 
@@ -46,10 +59,66 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
         }
     )
 
+    private val detailAdapter by lazy {
+
+        RouteDetailAdapter(
+
+            object : RouteDetailAdapter.Listener {
+
+                override fun onOutboundClick() {
+
+                    sendCommand(
+
+                        HomeCommand.ChangeVariant(
+                            Variant.OUTBOUND
+                        )
+                    )
+                }
+
+                override fun onInboundClick() {
+
+                    sendCommand(
+
+                        HomeCommand.ChangeVariant(
+                            Variant.INBOUND
+                        )
+                    )
+                }
+
+                override fun onRouteInformationClick() {
+
+                    sendCommand(
+
+                        HomeCommand.ChangeSegment(
+                            SegmentType.ROUTE_INFORMATION
+                        )
+                    )
+                }
+
+                override fun onBusStopClick() {
+
+                    sendCommand(
+
+                        HomeCommand.ChangeSegment(
+                            SegmentType.BUS_STOP
+                        )
+                    )
+                }
+
+                override fun onStopClick(stop: RouteStop) {
+
+                }
+            }
+        )
+    }
+
+    private lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
+
     override fun inflateBinding(): ActivitySearchResultBinding =
         ActivitySearchResultBinding.inflate(layoutInflater)
 
     override fun onInit() {
+        initBottomSheet()
         val locationSearch = navData as? LocationSearch
         // Cập nhật dữ liệu từ navData vào ViewModel trước
         locationSearch?.let {
@@ -79,6 +148,29 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
             adapter = this@SearchResultActivity.adapterArrival
         }
 
+        binding.rvRouteDetail.apply {
+            layoutManager =
+                LinearLayoutManager(this@SearchResultActivity)
+            adapter = detailAdapter
+        }
+    }
+
+    private fun initBottomSheet() {
+
+        bottomSheetBehavior = BottomSheetBehavior.from(binding.layoutBottomSheet)
+
+        val height = (resources.displayMetrics.heightPixels * 0.85f).toInt()
+
+        binding.layoutBottomSheet.layoutParams.height = height
+
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+
+        bottomSheetBehavior.skipCollapsed = true
+
+        bottomSheetBehavior.isHideable = true
+        binding.layoutBottomSheet.post {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        }
     }
 
     private fun displayViewWithTab() {
@@ -122,6 +214,14 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
                     notifyTextChanged = false
                 )
             }
+        }
+
+        collectState<RouteState, List<RouteDetailItem>>(
+            selector = {
+                it.detailItems
+            }
+        ) {
+            detailAdapter.submitList(it)
         }
 
     }
@@ -168,6 +268,36 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
         }
         binding.imBack.setSafeOnClick {
             onBackPressedDispatcher.onBackPressed()
+        }
+        binding.imgClose.setSafeOnClick {
+
+            bottomSheetBehavior.state =
+                BottomSheetBehavior.STATE_HIDDEN
+        }
+        bottomSheetBehavior.addBottomSheetCallback(
+            object : BottomSheetBehavior.BottomSheetCallback() {
+
+                override fun onStateChanged(bottomSheet: View, newState: Int) {
+
+                    when (newState) {
+                        BottomSheetBehavior.STATE_EXPANDED -> {
+                            binding.viewScrim.visibility = View.VISIBLE
+                        }
+
+                        BottomSheetBehavior.STATE_HIDDEN -> {
+                            binding.viewScrim.visibility = View.GONE
+                        }
+                    }
+                }
+
+                override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                    binding.viewScrim.alpha = slideOffset.coerceIn(0f, 1f)
+                }
+            }
+        )
+
+        binding.viewScrim.setOnClickListener {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         }
     }
 
@@ -309,6 +439,27 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
                 }
             }
 
+
+            is UiEvent.Error -> {
+                showConfirmDialog(title = event.message, onConfirm = {})
+            }
+
+            is HomeEvent.OpenRouteDetail -> {
+                val detail =
+                    viewModel.state.value.routeDetail ?: return
+                binding.tvRouteName.text =
+                    detail.routeName
+                binding.tvFrequency.text =
+                    "Every 15 min"
+                binding.tvDestination.text =
+                    if (viewModel.state.value.variant == Variant.OUTBOUND)
+                        detail.outboundStops?.lastOrNull()?.stopName
+                    else
+                        detail.inboundStops?.lastOrNull()?.stopName
+                bottomSheetBehavior.state =
+                    BottomSheetBehavior.STATE_EXPANDED
+            }
+
             else -> { /* To do*/
             }
         }
@@ -338,6 +489,32 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
 
     private fun getTextCurrentLocation(location: SearchLocation?): String {
         return location?.name.orEmpty()
+    }
+
+
+    override fun onStart() {
+        super.onStart()
+        detailAdapter.onStart()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        detailAdapter.onResume()
+    }
+
+    override fun onPause() {
+        detailAdapter.onPause()
+        super.onPause()
+    }
+
+    override fun onStop() {
+        detailAdapter.onStop()
+        super.onStop()
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        detailAdapter.onLowMemory()
     }
 
 }

@@ -71,7 +71,7 @@ class RoutePlanMapper @Inject constructor() :
                 itinerary.legs?.filter { it.mode == "WALK" }?.sumOf { it.duration ?: 0L }
 
             SuggestRouteItem(
-                routeId = busLeg?.routeId.orEmpty(),
+                routeId = busLeg?.routeId?.substringAfter(":") ?:"",
                 routeName = busLeg?.routeName.orEmpty(),
                 busMinutes = ((busTime ?: 0L) / 60).toInt(),
                 walkMinutes = ((walkTime ?: 0L) / 60).toInt()

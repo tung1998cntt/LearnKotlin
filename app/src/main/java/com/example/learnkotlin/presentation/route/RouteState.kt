@@ -29,7 +29,7 @@ data class RouteState(
 
     val routeDetail: RouteDetail? = null,
 
-    val detailItems: List<RouteDetailItem> = emptyList(),
+    val detailItems: List<RouteDetailItem> = listOf(),
 
     val variant: Variant = Variant.OUTBOUND,
 

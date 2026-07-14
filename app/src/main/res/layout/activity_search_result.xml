@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tool="http://schemas.android.com/tools"
@@ -190,3 +194,100 @@
         app:layout_constraintTop_toBottomOf="@+id/tvArrivingYourStop" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <View
+        android:id="@+id/viewScrim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#66000000"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true"/>
+
+    <LinearLayout
+        android:id="@+id/layoutBottomSheet"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_bottom_sheet"
+        android:orientation="vertical"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+        <!-- Header -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/dimen_16dp"
+            android:paddingTop="@dimen/dimen_16dp"
+            android:paddingEnd="@dimen/dimen_16dp"
+            android:paddingBottom="@dimen/dimen_12dp">
+
+            <ImageView
+                android:id="@+id/imgBus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_vehicle_red_42"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <LinearLayout
+                android:id="@+id/layoutInfo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/imgClose"
+                app:layout_constraintStart_toEndOf="@id/imgBus"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:id="@+id/tvRouteName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Route L1"
+                    android:textColor="@color/color_001737"
+                    android:textSize="@dimen/dimen_15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvFrequency"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Every 15 min"
+                    android:textColor="@color/color_7A7A7A"
+                    android:textSize="@dimen/dimen_13sp" />
+
+                <TextView
+                    android:id="@+id/tvDestination"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dimen_4dp"
+                    android:text="CHM Building • Hermitageweg"
+                    android:textColor="@color/color_7A7A7A"
+                    android:textSize="@dimen/dimen_13sp" />
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/imgClose"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_close_round_30"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvRouteDetail"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:paddingBottom="@dimen/dimen_100dp"
+            android:layout_weight="1" />
+
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

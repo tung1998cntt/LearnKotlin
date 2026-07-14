@@ -78,7 +78,7 @@ class NearbyArrivalMapper @Inject constructor() :
     )
 
     private fun ArrivalDto.toDomain() = Arrival(
-        routeId = routeId,
+        routeId = routeId.substringAfter(":"),
         routeShortName = routeShortName,
         routeLongName = routeLongName,
         tripId = tripId,
