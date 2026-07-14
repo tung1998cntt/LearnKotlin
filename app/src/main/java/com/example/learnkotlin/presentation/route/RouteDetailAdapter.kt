@@ -1,5 +1,6 @@
 package com.example.learnkotlin.presentation.route
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,6 +21,7 @@ import com.example.learnkotlin.domain.model.home.RouteDetailItem
 import com.example.learnkotlin.domain.model.home.RouteStop
 import com.example.learnkotlin.domain.model.home.SegmentType
 import com.example.learnkotlin.domain.model.home.Variant
+import com.example.learnkotlin.presentation.base.customview.VerticalDashDrawable
 
 class RouteDetailAdapter(
     private val listener: Listener
@@ -356,6 +358,18 @@ class RouteDetailAdapter(
         private val listener: Listener
     ) : RecyclerView.ViewHolder(binding.root) {
 
+        private val dashDrawable by lazy {
+            VerticalDashDrawable(
+                color = Color.parseColor("#C8C7CC"),
+                dashLength = dp(4).toFloat(),
+                dashGap = dp(3).toFloat(),
+                strokeWidth = dp(2).toFloat()
+            )
+        }
+        init {
+            binding.viewTop.background = dashDrawable
+            binding.viewBottom.background = dashDrawable
+        }
         fun bind(item: RouteDetailItem.Stop) {
 
             binding.tvName.text = item.stop.stopName
@@ -370,7 +384,6 @@ class RouteDetailAdapter(
 
             val lp = binding.imgPoint.layoutParams
             when {
-
                 item.isFirst -> {
                     binding.imgPoint.setImageResource(R.drawable.ic_blue_point_27)
                     lp.width = dp(27)
@@ -389,6 +402,7 @@ class RouteDetailAdapter(
                     lp.height = dp(27)
                 }
             }
+
             binding.imgPoint.layoutParams = lp
             binding.root.setSafeOnClick {
                 listener.onStopClick(item.stop)

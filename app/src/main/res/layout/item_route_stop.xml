@@ -3,31 +3,31 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="72dp">
+    android:layout_height="@dimen/dimen_60dp">
 
     <!-- line trên -->
 
     <View
         android:id="@+id/viewTop"
-        android:layout_width="@dimen/dimen_2dp"
+        android:layout_width="2dp"
         android:layout_height="0dp"
-        android:background="@color/color_C8C7CC"
+        android:layout_marginBottom="2dp"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/lnPoint"
-        app:layout_constraintEnd_toEndOf="@id/lnPoint"
         app:layout_constraintStart_toStartOf="@id/lnPoint"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="@id/lnPoint"/>
 
     <!-- line dưới -->
 
     <View
         android:id="@+id/viewBottom"
-        android:layout_width="@dimen/dimen_2dp"
+        android:layout_width="2dp"
         android:layout_height="0dp"
-        android:background="@color/color_C8C7CC"
+        android:layout_marginTop="2dp"
+        app:layout_constraintTop_toBottomOf="@id/lnPoint"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@id/lnPoint"
         app:layout_constraintStart_toStartOf="@id/lnPoint"
-        app:layout_constraintTop_toBottomOf="@id/lnPoint" />
+        app:layout_constraintEnd_toEndOf="@id/lnPoint"/>
 
     <LinearLayout
         android:id="@+id/lnPoint"
@@ -38,7 +38,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginStart="@dimen/dimen_34dp"
         >
         <ImageView
             android:id="@+id/imgPoint"
