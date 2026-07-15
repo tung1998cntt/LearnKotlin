@@ -401,9 +401,9 @@ class HomeRepositoryImpl @Inject constructor(
 
                 RoutePoint(
 
-                    longitude = it[0],
+                    longitude = it[1],
 
-                    latitude = it[1]
+                    latitude = it[0]
 
                 )
             } ?: listOf()

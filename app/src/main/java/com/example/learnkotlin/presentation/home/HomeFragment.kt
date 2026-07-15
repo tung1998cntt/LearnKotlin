@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import com.example.learnkotlin.BuildConfig
 import com.example.learnkotlin.R
+import com.example.learnkotlin.core.extensions.dpToPx
 import com.example.learnkotlin.core.extensions.setSafeOnClick
 import com.example.learnkotlin.databinding.FragmentHomeBinding
 import com.example.learnkotlin.domain.base.Command
@@ -416,6 +417,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         return ListPopupWindow(requireContext()).apply {
             anchorView = anchor
             width = anchor.width
+            height = 200.dpToPx(requireContext())
             isModal = false
             setAdapter(adapter)
             setOnItemClickListener { _, _, position, _ ->

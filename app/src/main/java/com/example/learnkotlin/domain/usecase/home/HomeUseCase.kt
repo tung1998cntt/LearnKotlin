@@ -76,12 +76,13 @@ class HomeUseCase @Inject constructor(
             is ApiResult.Success -> {
                 ApiResult.Success(
                     result.data.copy(
-                        routes = result.data.routes?.sortedWith { a, b ->
-                            collator.compare(
-                                a.routeName,
-                                b.routeName
-                            )
-                        }
+                        routes = result.data.routes
+//                            sortedWith { a, b ->
+//                            collator.compare(
+//                                a.routeName,
+//                                b.routeName
+//                            )
+//                        }
                     )
                 )
             }

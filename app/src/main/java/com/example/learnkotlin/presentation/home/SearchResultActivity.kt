@@ -40,7 +40,7 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
     private val adapter = SuggestRouteAdapter(object : SuggestRouteAdapter.Listener {
 
         override fun onRouteClick(item: SuggestRouteItem) {
-
+            viewModel.suggestData = item
             sendCommand(
                 HomeCommand.GetRouteDetail(
                     item.routeId
@@ -250,10 +250,20 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
         binding.segment.setOnTabSelectedListener {
             if (it == 0) {
                 viewModel.tabRoute = TabRoute.SUGGEST
-                sendCommand(HomeCommand.GetSuggestRoutes(navData as? LocationSearch))
+                sendCommand(HomeCommand.GetSuggestRoutes(
+                    LocationSearch(
+                        viewModel.state.value.selectedCurrentLocation,
+                        viewModel.state.value.selectedDestination
+                    )
+                ))
             } else {
                 viewModel.tabRoute = TabRoute.ARRIVING
-                sendCommand(HomeCommand.GetNearbyRoutes(navData as? LocationSearch))
+                sendCommand(HomeCommand.GetNearbyRoutes(
+                    LocationSearch(
+                        viewModel.state.value.selectedCurrentLocation,
+                        viewModel.state.value.selectedDestination
+                    )
+                ))
             }
             displayViewWithTab()
 
@@ -261,9 +271,21 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
         binding.lnFindRoute.setSafeOnClick {
             displayViewWithTab()
             if (viewModel.tabRoute == TabRoute.SUGGEST) {
-                sendCommand(HomeCommand.GetSuggestRoutes(navData as? LocationSearch))
+                sendCommand(
+                    HomeCommand.GetSuggestRoutes(
+                        LocationSearch(
+                            viewModel.state.value.selectedCurrentLocation,
+                            viewModel.state.value.selectedDestination
+                        )
+                    )
+                )
             } else {
-                sendCommand(HomeCommand.GetNearbyRoutes(navData as? LocationSearch))
+                sendCommand(HomeCommand.GetNearbyRoutes(
+                    LocationSearch(
+                        viewModel.state.value.selectedCurrentLocation,
+                        viewModel.state.value.selectedDestination
+                    )
+                ))
             }
         }
         binding.imBack.setSafeOnClick {
@@ -451,11 +473,11 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
                     detail.routeName
                 binding.tvFrequency.text =
                     "Every 15 min"
-                binding.tvDestination.text =
-                    if (viewModel.state.value.variant == Variant.OUTBOUND)
-                        detail.outboundStops?.lastOrNull()?.stopName
-                    else
-                        detail.inboundStops?.lastOrNull()?.stopName
+                binding.tvDestination.text = getString(
+                            R.string.start_end_route,
+                            viewModel.suggestData?.fromAddress,
+                            viewModel.suggestData?.toAddress
+                        )
                 bottomSheetBehavior.state =
                     BottomSheetBehavior.STATE_EXPANDED
             }

@@ -34,6 +34,8 @@ class SearchResultModel @Inject constructor(
 
     var tabRoute: TabRoute = TabRoute.SUGGEST
 
+    var suggestData: SuggestRouteItem? = null
+
     private companion object {
         const val SEARCH_DEBOUNCE = 300L
     }

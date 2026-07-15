@@ -11,6 +11,7 @@ import com.example.learnkotlin.domain.model.home.RouteLocation
 import com.example.learnkotlin.domain.model.home.RoutePlan
 import com.example.learnkotlin.presentation.home.SuggestRouteItem
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 class RoutePlanMapper @Inject constructor() :
     Mapper<RoutePlanResponseDto, RoutePlan> {
@@ -73,8 +74,11 @@ class RoutePlanMapper @Inject constructor() :
             SuggestRouteItem(
                 routeId = busLeg?.routeId?.substringAfter(":") ?:"",
                 routeName = busLeg?.routeName.orEmpty(),
-                busMinutes = ((busTime ?: 0L) / 60).toInt(),
-                walkMinutes = ((walkTime ?: 0L) / 60).toInt()
+                busMinutes = ((busTime ?: 0L) / 60.0).roundToInt(),
+                walkMinutes = ((walkTime ?: 0L) / 60.0).roundToInt(),
+                fromAddress =  busLeg?.from?.name,
+                toAddress =  busLeg?.to?.name,
+
             )
         } ?: listOf()
     }

@@ -9,5 +9,7 @@ data class SuggestRouteItem(
     val routeId: String,
     val routeName: String,
     val busMinutes: Int,
-    val walkMinutes: Int
+    val walkMinutes: Int,
+    val fromAddress: String? = null,
+    val toAddress: String? = null,
 ): Parcelable, NavData

@@ -1,9 +1,13 @@
 package com.example.learnkotlin.presentation.route
 
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.LinearLayout
+import androidx.core.content.getSystemService
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -159,6 +163,22 @@ class RouteFragment : BaseFragment<FragmentRouteBinding>() {
 
         binding.viewScrim.setOnClickListener {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        }
+
+        binding.sbSearchRoute.getEditText().setOnEditorActionListener { v, actionId, event ->
+            val isDone =
+                actionId == EditorInfo.IME_ACTION_DONE ||
+                        actionId == EditorInfo.IME_ACTION_UNSPECIFIED ||
+                        (event?.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)
+
+            if (isDone) {
+                val imm = requireContext().getSystemService<InputMethodManager>()
+                imm?.hideSoftInputFromWindow(v.windowToken, 0)
+                binding.sbSearchRoute.getEditText().clearFocus()
+                true
+            } else {
+                false
+            }
         }
 
     }

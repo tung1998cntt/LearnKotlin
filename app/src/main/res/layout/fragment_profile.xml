@@ -78,19 +78,18 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:drawablePadding="@dimen/dimen_4dp"
-                    android:text="Vu Hong Ngoc"
+                    android:text="—"
                     android:textColor="@color/color_000000"
                     android:textSize="@dimen/dimen_15sp"
                     android:textStyle="bold"
-                    app:drawableEndCompat="@drawable/ic_success_12" />
+                     />
 
                 <TextView
                     android:id="@+id/tvOperator"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/dimen_4dp"
-                    android:text="Nationaal Vervoer Bedrijf (NVB)"
+                    android:text="—"
                     android:textColor="@color/color_949EAB"
                     android:textSize="@dimen/dimen_13sp" />
 
@@ -100,6 +99,7 @@
                 android:id="@+id/imEdit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:visibility="gone"
                 android:contentDescription="@null"
                 android:src="@drawable/ic_edit_32" />
         </LinearLayout>
@@ -114,6 +114,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/dimen_16dp"
         android:layout_marginTop="@dimen/dimen_20dp"
+        android:visibility="gone"
         android:layout_marginBottom="@dimen/dimen_24dp"
         android:background="@drawable/bg_route_information"
         android:orientation="vertical"
@@ -362,6 +363,7 @@
         android:layout_marginTop="@dimen/dimen_12dp"
         android:background="@drawable/shape_bg_button_radius_6"
         android:gravity="center"
+        android:visibility="gone"
         android:paddingVertical="@dimen/dimen_10dp"
         android:text="@string/sign_out_title"
         android:textColor="@color/white"

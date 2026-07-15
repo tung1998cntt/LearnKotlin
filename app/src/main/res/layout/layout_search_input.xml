@@ -24,7 +24,6 @@
         android:hint="@string/search_hint_title"
         android:minHeight="@dimen/dimen_48dp"
         android:gravity="center_vertical"
-        android:imeOptions="actionSearch"
         android:importantForAutofill="no"
         android:inputType="text"
         android:maxLines="1"

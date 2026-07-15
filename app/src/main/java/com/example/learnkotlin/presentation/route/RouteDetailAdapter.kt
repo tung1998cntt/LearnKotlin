@@ -344,15 +344,17 @@ class RouteDetailAdapter(
             style: Style,
             item: RouteDetailItem.Map
         ) {
-            val points = item.stops
-                .flatMap { it.pathPoints.orEmpty() }
+            val points = item.points.map {
+                Point.fromLngLat(
+                    it.longitude,
+                    it.latitude
+                )
+            }
+
+            if (points.size < 2) return
 
             val feature = Feature.fromGeometry(
-                LineString.fromLngLats(
-                    points.map {
-                        Point.fromLngLat(it.longitude, it.latitude)
-                    }
-                )
+                LineString.fromLngLats(points)
             )
             val source = style.getSourceAs<GeoJsonSource>("route-source")
             if (source == null) {
@@ -381,7 +383,7 @@ class RouteDetailAdapter(
             item: RouteDetailItem.Map
         ) {
 
-            val first = item.stops.firstOrNull() ?: return
+            val first = item.points.firstOrNull() ?: return
 
             addMarker(
                 style = style,
@@ -397,7 +399,7 @@ class RouteDetailAdapter(
             item: RouteDetailItem.Map
         ) {
 
-            val last = item.stops.lastOrNull() ?: return
+            val last = item.points.lastOrNull() ?: return
 
             addMarker(
                 style = style,
@@ -458,14 +460,11 @@ class RouteDetailAdapter(
             item: RouteDetailItem.Map
         ) {
 
-            val routePoints = item.stops
-                .flatMap { it.pathPoints.orEmpty() }
-
-            if (routePoints.isEmpty()) return
+            if (item.points.isEmpty()) return
 
             val builder = LatLngBounds.Builder()
 
-            routePoints.forEach {
+            item.points.forEach {
                 builder.include(
                     LatLng(
                         it.latitude,
@@ -527,8 +526,8 @@ class RouteDetailAdapter(
 
         fun bind(item: RouteDetailItem.Information) {
 
-            binding.tvOperator.text =
-                item.operator
+            binding.tvOperator.text = "Nationaal Vervoer Bedrijf (NVB)"
+                //item.operator
 
             binding.tvPayment.text =
                 item.payment

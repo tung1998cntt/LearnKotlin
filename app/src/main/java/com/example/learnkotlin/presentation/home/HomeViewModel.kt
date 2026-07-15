@@ -276,7 +276,7 @@ class HomeViewModel @Inject constructor(
     ) {
 
         launchWithLoading(
-            showLoading = true,
+            showLoading = false,
             block = {
                 when (
                     val result = homeUseCase.login(

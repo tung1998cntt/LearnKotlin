@@ -1,9 +1,12 @@
 package com.example.learnkotlin.presentation.profile
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.learnkotlin.core.extensions.dpToPx
+import com.example.learnkotlin.core.extensions.hideKeyboard
 import com.example.learnkotlin.core.extensions.setSafeOnClick
 import com.example.learnkotlin.databinding.DialogFeedbackBinding
 import com.example.learnkotlin.domain.model.home.TypeFeedback
@@ -46,10 +49,16 @@ class FeedbackDialog() : BaseDialogFragment<DialogFeedbackBinding>() {
     }
 
     override fun setupView() {
+        updateSubmitButtonState()
         setupRecyclerView()
     }
 
     override fun setupListener() {
+        // Ẩn bàn phím khi nhấn vào vùng trống của dialog
+        binding.root.setOnClickListener {
+            it.hideKeyboard()
+        }
+
         binding.btnConfirmNo.setSafeOnClick {
             dismiss()
             onConfirmNo?.invoke()
@@ -63,6 +72,25 @@ class FeedbackDialog() : BaseDialogFragment<DialogFeedbackBinding>() {
         binding.ivClose.setSafeOnClick {
             dismiss()
         }
+        binding.edtShortTitle.doAfterTextChanged {
+            updateSubmitButtonState()
+        }
+
+        binding.metDescription.doAfterTextChanged {
+            updateSubmitButtonState()
+        }
+
+    }
+
+    fun View.setEnabledWithAlpha(enabled: Boolean) {
+        isEnabled = enabled
+        alpha = if (enabled) 1f else 0.65f
+    }
+
+    private fun updateSubmitButtonState() {
+        val hasSubject = binding.edtShortTitle.text?.toString()?.trim().orEmpty().isNotEmpty()
+        val hasDescription = binding.metDescription.text?.toString()?.trim().orEmpty().isNotEmpty()
+        binding.btnConfirmYes.setEnabledWithAlpha(hasSubject && hasDescription)
     }
 
     override val dialogWidth: Int

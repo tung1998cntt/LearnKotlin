@@ -3,6 +3,7 @@ package com.example.learnkotlin.core.extensions
 import android.content.Context
 import android.util.TypedValue
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import com.example.learnkotlin.core.network.ApiException
 import com.example.learnkotlin.core.network.ApiResult
 import com.example.learnkotlin.core.network.BaseResponse
@@ -56,4 +57,9 @@ fun Int.dpToPx(context: Context): Int {
         this.toFloat(),
         context.resources.displayMetrics
     ).toInt()
+}
+
+fun View.hideKeyboard() {
+    val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+    imm?.hideSoftInputFromWindow(windowToken, 0)
 }
