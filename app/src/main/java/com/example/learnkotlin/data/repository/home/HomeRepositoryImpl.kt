@@ -12,10 +12,12 @@ import com.example.learnkotlin.core.network.ApiService
 import com.example.learnkotlin.core.network.GeocodingApi
 import com.example.learnkotlin.core.network.PlanApiService
 import com.example.learnkotlin.core.secure.SecureSharedPrefs
+import com.example.learnkotlin.data.mapper.home.BusStopRouteMapper
 import com.example.learnkotlin.data.mapper.home.NearbyArrivalMapper
 import com.example.learnkotlin.data.mapper.home.NearbyArrivalRequestMapper
 import com.example.learnkotlin.data.mapper.home.RoutePlanMapper
 import com.example.learnkotlin.data.mapper.home.SearchLocationMapper
+import com.example.learnkotlin.data.mapper.home.StopMapper
 import com.example.learnkotlin.data.model.request.LoginRequestDto
 import com.example.learnkotlin.data.model.request.RouteListRequestDto
 import com.example.learnkotlin.data.model.response.AreaDto
@@ -25,6 +27,7 @@ import com.example.learnkotlin.data.model.response.RouteItemDto
 import com.example.learnkotlin.data.model.response.RouteListResponseDto
 import com.example.learnkotlin.data.model.response.RouteStopDto
 import com.example.learnkotlin.domain.model.home.Area
+import com.example.learnkotlin.domain.model.home.BusStop
 import com.example.learnkotlin.domain.model.home.LoginRequest
 import com.example.learnkotlin.domain.model.home.LoginResponse
 import com.example.learnkotlin.domain.model.home.NearbyArrivalRequest
@@ -327,6 +330,21 @@ class HomeRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getStops():ApiResult<List<BusStop>> {
+        return when (
+            val result = safeApiCallNotBase {
+                apiService.getStops()
+            }
+        ) {
+            is ApiResult.Success ->
+                ApiResult.Success(
+                    StopMapper.map(
+                        result.data.stops ?: listOf()
+                    )
+                )
+            is ApiResult.Error -> result
+        }
+    }
 
     fun RouteDetailResponseDto.toDomain() =
         RouteDetail(

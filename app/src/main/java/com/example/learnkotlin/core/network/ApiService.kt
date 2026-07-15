@@ -4,6 +4,7 @@ import com.example.learnkotlin.data.model.request.LoginRequestDto
 import com.example.learnkotlin.data.model.request.NearbyArrivalRequestDto
 import com.example.learnkotlin.data.model.request.RouteListRequestDto
 import com.example.learnkotlin.data.model.response.AreaDto
+import com.example.learnkotlin.data.model.response.BusStopResponseDto
 import com.example.learnkotlin.data.model.response.LoginResponseDto
 import com.example.learnkotlin.data.model.response.NearbyArrivalResponseDto
 import com.example.learnkotlin.data.model.response.RouteDetailResponseDto
@@ -45,6 +46,9 @@ interface ApiService {
         @Query("variant")
         variant:String
     ): RouteDetailResponseDto
+
+    @GET("/api/v1/stops")
+    suspend fun getStops(): BusStopResponseDto
 
 
 }

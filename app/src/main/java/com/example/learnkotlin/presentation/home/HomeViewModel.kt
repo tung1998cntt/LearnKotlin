@@ -8,6 +8,8 @@ import com.example.learnkotlin.domain.model.home.LoginRequest
 import com.example.learnkotlin.domain.model.home.NearbyArrivalRequest
 import com.example.learnkotlin.domain.model.home.RoutePlanRequest
 import com.example.learnkotlin.domain.model.home.SearchLocation
+import com.example.learnkotlin.domain.model.home.SegmentType
+import com.example.learnkotlin.domain.model.home.Variant
 import com.example.learnkotlin.domain.usecase.home.HomeUseCase
 import com.example.learnkotlin.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -304,5 +306,27 @@ class HomeViewModel @Inject constructor(
             customErrorHandler = null
         )
     }
+
+
+    private fun getBusStops(){
+
+        launchWithLoading(
+            showLoading = true,
+            block = {
+                when(
+                    val result = homeUseCase.getBusStops()
+                ){
+                    is ApiResult.Success ->{
+
+                    }
+                    is ApiResult.Error ->{
+
+                    }
+                }
+            },
+            customErrorHandler = null
+        )
+    }
+
 
 }

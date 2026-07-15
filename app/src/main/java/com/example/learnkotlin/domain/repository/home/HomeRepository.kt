@@ -2,6 +2,7 @@ package com.example.learnkotlin.domain.repository.home
 
 import com.example.learnkotlin.core.network.ApiResult
 import com.example.learnkotlin.domain.model.home.Area
+import com.example.learnkotlin.domain.model.home.BusStop
 import com.example.learnkotlin.domain.model.home.LoginRequest
 import com.example.learnkotlin.domain.model.home.LoginResponse
 import com.example.learnkotlin.domain.model.home.NearbyArrivalRequest
@@ -48,5 +49,7 @@ interface HomeRepository {
         id:String,
         variant:String
     ):ApiResult<RouteDetail>
+
+     suspend fun getStops():ApiResult<List<BusStop>>
 
 }

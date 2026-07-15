@@ -1,6 +1,7 @@
 package com.example.learnkotlin.domain.usecase.home
 
 import com.example.learnkotlin.core.network.ApiResult
+import com.example.learnkotlin.domain.model.home.BusStop
 import com.example.learnkotlin.domain.model.home.LoginRequest
 import com.example.learnkotlin.domain.model.home.LoginResponse
 import com.example.learnkotlin.domain.model.home.NearbyArrivalRequest
@@ -102,5 +103,9 @@ class HomeUseCase @Inject constructor(
         id: String,
         variant: String
     ) = homeRepository.getRouteDetail(id, variant)
+
+    suspend fun getBusStops(): ApiResult<List<BusStop>> {
+        return homeRepository.getStops()
+    }
 
 }
