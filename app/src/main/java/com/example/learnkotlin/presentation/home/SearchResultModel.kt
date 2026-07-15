@@ -10,6 +10,7 @@ import com.example.learnkotlin.domain.model.home.NearbyArrivalRequest
 import com.example.learnkotlin.domain.model.home.RouteDetail
 import com.example.learnkotlin.domain.model.home.RouteDetailItem
 import com.example.learnkotlin.domain.model.home.RoutePlanRequest
+import com.example.learnkotlin.domain.model.home.RouteStop
 import com.example.learnkotlin.domain.model.home.SearchLocation
 import com.example.learnkotlin.domain.model.home.SegmentType
 import com.example.learnkotlin.domain.model.home.Variant
@@ -35,6 +36,7 @@ class SearchResultModel @Inject constructor(
     var tabRoute: TabRoute = TabRoute.SUGGEST
 
     var suggestData: SuggestRouteItem? = null
+    var nearbyArrivalData: NearbyArrivalItem? = null
 
     private companion object {
         const val SEARCH_DEBOUNCE = 300L
@@ -354,84 +356,114 @@ class SearchResultModel @Inject constructor(
         segment: SegmentType
     ): List<RouteDetailItem> {
 
-        val stops = when (variant) {
-            Variant.OUTBOUND -> response.outboundStops
-            Variant.INBOUND -> response.inboundStops
-        }
-
-        val items = mutableListOf<RouteDetailItem>()
-
-        // 1. Summary
-        items += RouteDetailItem.Summary(
-            fare = "SRD 8", // lấy từ API nếu có
-            distance = if (variant == Variant.OUTBOUND) {
-                context.getString(R.string.km_value, response.outboundDistance)
-            } else {
-                context.getString(R.string.km_value, response.inboundDistance)
-            },
-            stopCount = stops?.size ?: 0
-        )
-
-        // 2. Direction
-        items += RouteDetailItem.Direction(
-            selected = variant
-        )
-
-        // 3. Map
-        items += RouteDetailItem.Map(
-            points = stops?.flatMap { it.pathPoints ?: listOf()} ?: listOf(),
-            stops = stops ?: listOf()
-        )
-
-        // 4. Segment
-        items += RouteDetailItem.Segment(
-            selected = segment
-        )
-
-        when (segment) {
-
-            SegmentType.ROUTE_INFORMATION -> {
-
-                items += RouteDetailItem.Information(
-
-                    operator = response.orgName ?: "Nationaal Vervoer Bed",
-
-                    payment = "Cash (SRD), OmniCard, Mobile pay",
-
-                    operatingHours = RouteDetailItem.OperatingHours(
-
-                        day1 = "Mon - Fri",
-                        time1 = "05:30 - 22:00",
-
-                        day2 = "Saturday",
-                        time2 = "06:30 - 22:00",
-
-                        day3 = "Sunday & Holidays",
-                        time3 = "07:00 - 22:00"
-                    )
-                )
+        if (tabRoute == TabRoute.SUGGEST) {
+            val stops = when (variant) {
+                Variant.OUTBOUND -> response.outboundStops
+                Variant.INBOUND -> response.inboundStops
             }
 
-            SegmentType.BUS_STOP -> {
+            val items = mutableListOf<RouteDetailItem>()
 
-                stops?.forEachIndexed { index, stop ->
+            // 1. Summary
+            items += RouteDetailItem.Summary(
+                fare = "SRD 8", // lấy từ API nếu có
+                distance = if (variant == Variant.OUTBOUND) {
+                    context.getString(R.string.km_value, response.outboundDistance)
+                } else {
+                    context.getString(R.string.km_value, response.inboundDistance)
+                },
+                stopCount = stops?.size ?: 0
+            )
 
-                    items += RouteDetailItem.Stop(
+            // 2. Direction
+            items += RouteDetailItem.Direction(
+                selected = variant
+            )
 
-                        stop = stop,
+            // 3. Map
+            items += RouteDetailItem.Map(
+                points = stops?.flatMap { it.pathPoints ?: listOf() } ?: listOf(),
+                stops = stops ?: listOf()
+            )
 
-                        // API chưa có khoảng cách
-                        distanceText = "+0.6km",
+            // 4. Segment
+            items += RouteDetailItem.Segment(
+                selected = segment
+            )
 
-                        isFirst = index == 0,
+            when (segment) {
 
-                        isLast = index == stops.lastIndex
+                SegmentType.ROUTE_INFORMATION -> {
+
+                    items += RouteDetailItem.Information(
+
+                        operator = response.orgName ?: "Nationaal Vervoer Bed",
+
+                        payment = "Cash (SRD), OmniCard, Mobile pay",
+
+                        operatingHours = RouteDetailItem.OperatingHours(
+
+                            day1 = "Mon - Fri",
+                            time1 = "05:30 - 22:00",
+
+                            day2 = "Saturday",
+                            time2 = "06:30 - 22:00",
+
+                            day3 = "Sunday & Holidays",
+                            time3 = "07:00 - 22:00"
+                        )
                     )
                 }
+
+                SegmentType.BUS_STOP -> {
+
+                    stops?.forEachIndexed { index, stop ->
+
+                        items += RouteDetailItem.Stop(
+
+                            stop = stop,
+
+                            // API chưa có khoảng cách
+                            distanceText = "+0.6km",
+
+                            isFirst = index == 0,
+
+                            isLast = index == stops.lastIndex
+                        )
+                    }
+                }
             }
+            return items
+        } else {
+            val allStops: List<RouteStop> = buildList {
+                addAll(response.outboundStops.orEmpty())
+                addAll(response.inboundStops.orEmpty())
+            }
+            val items = mutableListOf<RouteDetailItem>()
+
+            // 3. Map
+            items += RouteDetailItem.Map(
+                points = allStops.flatMap { it.pathPoints ?: listOf() },
+                stops = allStops
+            )
+            allStops.forEachIndexed { index, stop ->
+
+                items += RouteDetailItem.Stop(
+
+                    stop = stop,
+
+                    // API chưa có khoảng cách
+                    distanceText = "+0.6km",
+
+                    isFirst = index == 0,
+
+                    isLast = index == allStops.lastIndex
+                )
+            }
+            return items
         }
 
-        return items
+
     }
 
 }

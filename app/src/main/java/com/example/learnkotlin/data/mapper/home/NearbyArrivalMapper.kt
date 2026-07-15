@@ -39,23 +39,26 @@ class NearbyArrivalMapper @Inject constructor() :
                 val vehicle = arrival.vehicles.firstOrNull()
 
                 NearbyArrivalItem(
-                    routeId = arrival.routeId,
+                    routeId = arrival.routeId.substringAfter(":"),
                     routeName = stop.stopName,
                     plate = vehicle?.licensePlate.orEmpty(),
-                    etaTime = arrival.estimatedArrival.toHourMinute(),       // 19:10
+                    etaTime = vehicle?.etaTime?.toHourMinute() ?: "",       // 19:10
                     etaMinutes = arrival.minutesToArrival
                 )
             }
         }
     }
 
-    private fun String.toHourMinute(): String {
+    private fun String?.toHourMinute(): String {
 
-        return java.time.OffsetDateTime.parse(this)
-            .toLocalTime()
-            .format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))
+        if (this.isNullOrBlank()) return ""
+
+        return runCatching {
+            java.time.OffsetDateTime.parse(this)
+                .toLocalTime()
+                .format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))
+        }.getOrDefault("")
     }
-
     private fun OriginDto.toDomain() = Origin(
         lat = lat,
         lon = lon

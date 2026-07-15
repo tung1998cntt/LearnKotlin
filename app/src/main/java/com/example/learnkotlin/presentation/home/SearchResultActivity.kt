@@ -57,8 +57,8 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
         object : NearbyArrivalAdapter.Listener {
 
             override fun onArrivalClick(item: NearbyArrivalItem) {
-
-                // mở màn chi tiết xe
+                viewModel.nearbyArrivalData = item
+                sendCommand(HomeCommand.GetRouteDetail(item.routeId))
             }
         }
     )
@@ -488,19 +488,36 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
             }
 
             is HomeEvent.OpenRouteDetail -> {
-                val detail =
-                    viewModel.state.value.routeDetail ?: return
-                binding.tvRouteName.text =
-                    detail.routeName
-                binding.tvFrequency.text =
-                    "Every 15 min"
-                binding.tvDestination.text = getString(
-                            R.string.start_end_route,
-                            viewModel.suggestData?.fromAddress,
-                            viewModel.suggestData?.toAddress
-                        )
-                bottomSheetBehavior.state =
-                    BottomSheetBehavior.STATE_EXPANDED
+                if (viewModel.tabRoute == TabRoute.SUGGEST) {
+                    val detail =
+                        viewModel.state.value.routeDetail ?: return
+                    binding.tvFrequency.isVisible = true
+                    binding.tvRouteName.text =
+                        detail.routeName
+                    binding.tvFrequency.text =
+                        "Every 15 min"
+                    binding.tvDestination.text = getString(
+                        R.string.start_end_route,
+                        viewModel.suggestData?.fromAddress,
+                        viewModel.suggestData?.toAddress
+                    )
+                    bottomSheetBehavior.state =
+                        BottomSheetBehavior.STATE_EXPANDED
+                } else {
+                    val detail =
+                        viewModel.state.value.routeDetail ?: return
+                    binding.tvRouteName.text =
+                        detail.routeName
+                    binding.tvFrequency.isVisible = false
+                    binding.tvDestination.text = getString(
+                        R.string.plate_and_eta,
+                        viewModel.nearbyArrivalData?.plate,
+                        viewModel.nearbyArrivalData?.etaTime
+                    )
+                    bottomSheetBehavior.state =
+                        BottomSheetBehavior.STATE_EXPANDED
+                }
+
             }
 
             else -> { /* To do*/
