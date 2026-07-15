@@ -1,5 +1,9 @@
 package com.example.learnkotlin.presentation.home
 
+import android.graphics.Typeface
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.StyleSpan
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.ListPopupWindow
@@ -132,7 +136,23 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
         sendCommand(HomeCommand.GetSuggestRoutes(navData as? LocationSearch))
     }
 
+    private fun setArrivingYourStop(stopName: String) {
+        val text = getString(R.string.arriving_at_your_stop_s, stopName)
+        val spannable = SpannableString(text)
+        val start = text.indexOf(stopName)
+        if (start != -1) {
+            val end = start + stopName.length
+            spannable.setSpan(
+                StyleSpan(Typeface.BOLD),
+                start,
+                end,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
+        binding.tvArrivingYourStop.text = spannable
+    }
     private fun initView() {
+        setArrivingYourStop(binding.sbDestination.getText())
         displayViewWithTab()
         binding.lnFindRoute.setEnabledWithAlpha(
             !viewModel.state.value.selectedCurrentLocation?.name.isNullOrBlank(),
@@ -269,6 +289,7 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
 
         }
         binding.lnFindRoute.setSafeOnClick {
+            setArrivingYourStop(binding.sbDestination.getText())
             displayViewWithTab()
             if (viewModel.tabRoute == TabRoute.SUGGEST) {
                 sendCommand(
