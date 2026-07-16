@@ -599,6 +599,10 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             }
         }
 
+        binding.ctNotification.setSafeOnClick {
+            /* Sang activity NotificationActivity*/
+        }
+
     }
 
     private fun bindSearchBar(
