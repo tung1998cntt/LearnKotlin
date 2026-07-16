@@ -1,5 +1,6 @@
 package com.example.learnkotlin.presentation.route
 
+import android.os.Bundle
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -8,6 +9,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.LinearLayout
 import androidx.core.content.getSystemService
+import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -96,7 +98,12 @@ class RouteFragment : BaseFragment<FragmentRouteBinding>() {
                 }
 
                 override fun onStopClick(stop: RouteStop) {
-
+                    val bundle = Bundle().apply {
+                        putDouble("lat", stop.latitude)
+                        putDouble("lng", stop.longitude)
+                    }
+                    setFragmentResult("STOP_CLICK_RESULT", bundle)
+                    requireActivity().onBackPressedDispatcher.onBackPressed()
                 }
             }
         )

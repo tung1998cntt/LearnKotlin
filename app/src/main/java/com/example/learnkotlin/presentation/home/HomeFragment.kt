@@ -133,7 +133,21 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 }
 
                 override fun onStopClick(stop: RouteStop) {
+                    if (::popupCurrentLocation.isInitialized) popupCurrentLocation.dismiss()
+                    if (::popupDestination.isInitialized) popupDestination.dismiss()
+                    binding.layoutBusStopInfo.root.isVisible = false
+                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                    bottomSheetBehaviorRoute.state = BottomSheetBehavior.STATE_HIDDEN
 
+                    if (::map.isInitialized) {
+                        showSelectedStopMarker(stop.latitude, stop.longitude)
+                        map.animateCamera(
+                            CameraUpdateFactory.newLatLngZoom(
+                                LatLng(stop.latitude, stop.longitude),
+                                16.0
+                            )
+                        )
+                    }
                 }
             }
         )
@@ -194,6 +208,11 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         const val STOP_SOURCE = "stop_source"
         const val STOP_LAYER = "stop_layer"
         const val STOP_ICON = "stop_icon"
+
+        // Selected Stop
+        const val SELECTED_STOP_SOURCE = "selected_stop_source"
+        const val SELECTED_STOP_LAYER = "selected_stop_layer"
+        const val SELECTED_STOP_ICON = "selected_stop_icon"
 
         const val GEOCODE_DISTANCE_METERS = 50f
     }
@@ -846,6 +865,29 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 )
             )
         }
+
+        // Selected Stop Layer
+        if (style.getSource(SELECTED_STOP_SOURCE) == null) {
+            getBitmapFromVectorDrawable(requireContext(), R.drawable.ic_location_42)?.let {
+                style.addImage(SELECTED_STOP_ICON, it)
+            }
+            style.addSource(
+                GeoJsonSource(
+                    SELECTED_STOP_SOURCE,
+                    FeatureCollection.fromFeatures(emptyArray())
+                )
+            )
+            style.addLayer(
+                SymbolLayer(
+                    SELECTED_STOP_LAYER,
+                    SELECTED_STOP_SOURCE
+                ).withProperties(
+                    iconImage(SELECTED_STOP_ICON),
+                    iconAllowOverlap(true),
+                    iconIgnorePlacement(true)
+                )
+            )
+        }
     }
 
     private fun getBitmapFromVectorDrawable(context: Context, drawableId: Int): Bitmap? {
@@ -872,6 +914,16 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                         longitude,
                         latitude
                     )
+                )
+            )
+    }
+
+    private fun showSelectedStopMarker(latitude: Double, longitude: Double) {
+        val style = map.style ?: return
+        style.getSourceAs<GeoJsonSource>(SELECTED_STOP_SOURCE)
+            ?.setGeoJson(
+                Feature.fromGeometry(
+                    Point.fromLngLat(longitude, latitude)
                 )
             )
     }
