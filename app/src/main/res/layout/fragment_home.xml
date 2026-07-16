@@ -191,17 +191,11 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!--    <include-->
-    <!--        android:id="@+id/layoutSearch"-->
-    <!--        layout="@layout/include_home_search"-->
-    <!--        app:layout_constraintTop_toBottomOf="@id/layoutHeader"-->
-    <!--        app:layout_constraintStart_toStartOf="parent"-->
-    <!--        app:layout_constraintEnd_toEndOf="parent"/>-->
-
-    <!--    <include-->
-    <!--        android:id="@+id/layoutFab"-->
-    <!--        layout="@layout/include_home_fab"-->
-    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
-    <!--        app:layout_constraintEnd_toEndOf="parent"/>-->
+    <include
+        android:id="@+id/layoutBusStopInfo"
+        layout="@layout/layout_bus_stop_info"
+        android:layout_width="260dp"
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

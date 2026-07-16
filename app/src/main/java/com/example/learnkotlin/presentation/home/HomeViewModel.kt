@@ -34,8 +34,7 @@ class HomeViewModel @Inject constructor(
     override fun createInitialState() = HomeState()
 
     override fun onReady() {
-
-
+        //getBusStops()
     }
 
     private fun searchLocation(keyword: String) {
@@ -217,12 +216,6 @@ class HomeViewModel @Inject constructor(
         launchWithLoading(
             showLoading = true,
             block = {
-                //            val request = RoutePlanRequest(
-//                fromLat = from.latitude ?: 0.0,
-//                fromLon = from.longitude ?: 0.0,
-//                toLat = to.latitude ?: 0.0,
-//                toLon = to.longitude ?: 0.0
-//            )
                 val request = RoutePlanRequest(
                     fromLat = 5.824683700032168,
                     fromLon = -55.154445192050275,
@@ -270,57 +263,23 @@ class HomeViewModel @Inject constructor(
     }
 
 
-     fun login(
-        username: String? = null,
-        password: String? = null
-    ) {
-
+    fun getBusStops() {
         launchWithLoading(
             showLoading = false,
             block = {
-                when (
-                    val result = homeUseCase.login(
-                        LoginRequest(
-//                            username = "anhnt650",
-//                            password = "123456aC@"
-
-                            username = "suriname",
-                            password = "123456aA@"
-                        )
-                    )
-                ) {
+                when (val result = homeUseCase.getBusStops()) {
                     is ApiResult.Success -> {
-                        /* To do*/
-
+                        updateState {
+                            copy(busStops = result.data.orEmpty())
+                        }
                     }
+
                     is ApiResult.Error -> {
                         sendEvent(
                             HomeEvent.ShowError(
                                 result.message ?: "Unknown error"
                             )
                         )
-                    }
-
-                }
-            },
-            customErrorHandler = null
-        )
-    }
-
-
-    private fun getBusStops(){
-
-        launchWithLoading(
-            showLoading = true,
-            block = {
-                when(
-                    val result = homeUseCase.getBusStops()
-                ){
-                    is ApiResult.Success ->{
-
-                    }
-                    is ApiResult.Error ->{
-
                     }
                 }
             },

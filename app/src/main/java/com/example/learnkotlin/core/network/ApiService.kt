@@ -47,8 +47,5 @@ interface ApiService {
         variant:String
     ): RouteDetailResponseDto
 
-    @GET("/api/v1/stops")
-    suspend fun getStops(): BusStopResponseDto
-
 
 }

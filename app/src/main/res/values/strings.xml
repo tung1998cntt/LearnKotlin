@@ -65,4 +65,5 @@
     <string name="start_end_route">%s - %s</string>
     <string name="eta_s">ETA %s</string>
     <string name="plate_and_eta">Plate %s ● ETA %s</string>
+    <string name="track_buses">Track buses</string>
 </resources>

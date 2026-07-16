@@ -1,6 +1,7 @@
 package com.example.learnkotlin.core.network
 
 import com.example.learnkotlin.data.model.request.NearbyArrivalRequestDto
+import com.example.learnkotlin.data.model.response.BusStopResponseDto
 import com.example.learnkotlin.data.model.response.NearbyArrivalResponseDto
 import com.example.learnkotlin.data.model.response.RoutePlanResponseDto
 import retrofit2.http.Body
@@ -22,4 +23,8 @@ interface PlanApiService {
     suspend fun getNearbyArrivals(
         @Body request: NearbyArrivalRequestDto
     ): NearbyArrivalResponseDto
+
+    @GET("/api/v1/stops")
+    suspend fun getStops(): BusStopResponseDto
+
 }

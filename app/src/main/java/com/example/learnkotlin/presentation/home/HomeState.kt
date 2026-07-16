@@ -1,5 +1,6 @@
 package com.example.learnkotlin.presentation.home
 
+import com.example.learnkotlin.domain.model.home.BusStop
 import com.example.learnkotlin.domain.model.home.RouteDetail
 import com.example.learnkotlin.domain.model.home.RouteDetailItem
 import com.example.learnkotlin.domain.model.home.SearchLocation
@@ -14,7 +15,10 @@ data class HomeState(
     val destinationKeyword: String = "",
     val selectedDestination: SearchLocation? = null,
 
-
+    //========================
+    // Bus Stops
+    //========================
+    val busStops: List<BusStop> = emptyList(),
 
 
     //========================

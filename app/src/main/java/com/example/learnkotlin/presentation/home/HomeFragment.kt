@@ -2,8 +2,11 @@ package com.example.learnkotlin.presentation.home
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
 import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
@@ -11,14 +14,17 @@ import android.view.ViewGroup
 import android.widget.ListPopupWindow
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import com.example.learnkotlin.BuildConfig
 import com.example.learnkotlin.R
 import com.example.learnkotlin.core.extensions.dpToPx
 import com.example.learnkotlin.core.extensions.setSafeOnClick
 import com.example.learnkotlin.databinding.FragmentHomeBinding
+import com.example.learnkotlin.databinding.LayoutBusStopInfoBinding
 import com.example.learnkotlin.domain.base.Command
 import com.example.learnkotlin.domain.base.customview.SearchInputView
+import com.example.learnkotlin.domain.model.home.BusStop
 import com.example.learnkotlin.domain.model.home.LocationSearch
 import com.example.learnkotlin.domain.model.home.SearchLocation
 import com.example.learnkotlin.presentation.base.BaseFragment
@@ -32,6 +38,7 @@ import com.google.android.gms.location.Priority
 import dagger.hilt.android.AndroidEntryPoint
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.style.layers.PropertyFactory.iconAllowOverlap
 import org.maplibre.android.style.layers.PropertyFactory.iconIgnorePlacement
@@ -41,6 +48,7 @@ import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.FeatureCollection
 import org.maplibre.geojson.Point
+import androidx.core.graphics.createBitmap
 
 @AndroidEntryPoint
 class HomeFragment : BaseFragment<FragmentHomeBinding>() {
@@ -61,6 +69,12 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     private var lastGeocodeLocation: android.location.Location? = null
 
     private var selectedField: SelectedField = SelectedField.CURRENT
+
+    private var selectedFeature: Feature? = null
+
+    private val popupBinding by lazy {
+        LayoutBusStopInfoBinding.bind(binding.layoutBusStopInfo.root)
+    }
 
     private val locationCallback = object : LocationCallback() {
 
@@ -97,6 +111,11 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         const val GPS_SOURCE = "gps_source"
         const val GPS_LAYER = "gps_layer"
         const val GPS_ICON = "gps_icon"
+
+        // Bus Stops
+        const val STOP_SOURCE = "stop_source"
+        const val STOP_LAYER = "stop_layer"
+        const val STOP_ICON = "stop_icon"
 
         const val GEOCODE_DISTANCE_METERS = 50f
     }
@@ -204,13 +223,13 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     ) = FragmentHomeBinding.inflate(inflater, container, false)
 
     override fun onInit() {
-        viewModel.login()
         initData()
-        initView()
         initMap()
+        initView()
         initPopup()
         initAction()
         observeState()
+        viewModel.getBusStops()
     }
 
     private fun initData() {
@@ -230,6 +249,15 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             !viewModel.state.value.selectedCurrentLocation?.name.isNullOrBlank(),
             !viewModel.state.value.selectedDestination?.name.isNullOrBlank(),
         )
+
+        popupBinding.ivClose.setSafeOnClick {
+            binding.layoutBusStopInfo.root.isVisible = false
+        }
+
+        popupBinding.lnTrackBuses.setSafeOnClick {
+
+        }
+
     }
 
     private fun observeState() {
@@ -300,6 +328,41 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             )
         }
 
+        collectState<HomeState, List<BusStop>>(
+            selector = { it.busStops }
+        ) { busStops ->
+            if (!::map.isInitialized) return@collectState
+            updateBusStopMarkers(busStops)
+        }
+
+    }
+
+    private fun updateBusStopMarkers(busStops: List<BusStop>) {
+        val style = map.style ?: return
+        if (busStops.isEmpty()) return
+
+        val features = busStops.mapNotNull { stop ->
+            val lat = stop.latitude ?: return@mapNotNull null
+            val lon = stop.longitude ?: return@mapNotNull null
+            Feature.fromGeometry(
+                Point.fromLngLat(lon, lat)
+            ).apply {
+                addStringProperty("id", stop.gtfsId)
+                addStringProperty("name", stop.name)
+            }
+        }
+        style.getSourceAs<GeoJsonSource>(STOP_SOURCE)
+            ?.setGeoJson(FeatureCollection.fromFeatures(features))
+
+        // Tự động di chuyển camera đến vùng có các trạm xe buýt
+        if (features.isNotEmpty()) {
+            val builder = LatLngBounds.Builder()
+            features.forEach { feature ->
+                val point = feature.geometry() as Point
+                builder.include(LatLng(point.latitude(), point.longitude()))
+            }
+            map.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 150))
+        }
     }
 
     fun View.setEnabledWithAlpha(enabledCurrentLocation: Boolean, enableDestination: Boolean) {
@@ -446,8 +509,18 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 moveDefault()
                 requestLocationPermission()
             }
+            updateBusStopMarkers(viewModel.state.value.busStops)
         }
         map.addOnMapClickListener { point ->
+            val screenPoint = map.projection.toScreenLocation(point)
+            val features = map.queryRenderedFeatures(screenPoint, STOP_LAYER)
+            if (features.isNotEmpty()) {
+                val feature = features[0]
+                selectedFeature = feature
+                showBusStopPopup(feature)
+                return@addOnMapClickListener true
+            }
+
             sendCommand(
                 HomeCommand.ReverseLocation(
                     latitude = point.latitude,
@@ -457,19 +530,68 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             )
             true
         }
+
+        map.addOnCameraIdleListener {
+            selectedFeature?.let(::showBusStopPopup)
+        }
+    }
+
+    private fun showBusStopPopup(feature: Feature) {
+
+        val point = feature.geometry() as Point
+
+        val latLng = LatLng(
+            point.latitude(),
+            point.longitude()
+        )
+
+        val screenPoint = map.projection.toScreenLocation(latLng)
+
+        showPopupAt(
+            screenPoint.x.toFloat(),
+            screenPoint.y.toFloat(),
+            feature
+        )
+    }
+
+    private fun showPopupAt(
+        x: Float,
+        y: Float,
+        feature: Feature
+    ) {
+        val popup = binding.layoutBusStopInfo.root
+        LayoutBusStopInfoBinding.bind(popup).apply {
+            tvStopName.text = feature.getStringProperty("name")
+        }
+        popup.isVisible = true
+
+        if (popup.width == 0) {
+            popup.post {
+                updatePopupPosition(x, y)
+            }
+        } else {
+            updatePopupPosition(x, y)
+        }
+    }
+
+    private fun updatePopupPosition(
+        x: Float,
+        y: Float
+    ) {
+        val popup = binding.layoutBusStopInfo.root
+
+        popup.translationX = x - popup.width / 2f
+        popup.translationY = y - popup.height - 16.dpToPx(requireContext())
     }
 
     private fun initMarkerLayers() {
-
         val style = map.style ?: return
+        
+        // GPS Layer
         if (style.getSource(GPS_SOURCE) == null) {
-            style.addImage(
-                GPS_ICON,
-                BitmapFactory.decodeResource(
-                    resources,
-                    R.drawable.ic_my_location
-                )
-            )
+            getBitmapFromVectorDrawable(requireContext(), R.drawable.ic_my_location)?.let {
+                style.addImage(GPS_ICON, it)
+            }
             style.addSource(
                 GeoJsonSource(
                     GPS_SOURCE,
@@ -488,6 +610,42 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 )
             )
         }
+
+        // Bus Stop Layer
+        if (style.getSource(STOP_SOURCE) == null) {
+            // Sử dụng ic_route_42 cho marker trạm xe buýt để dễ nhìn hơn
+            getBitmapFromVectorDrawable(requireContext(), R.drawable.ic_stop_marker)?.let {
+                style.addImage(STOP_ICON, it)
+            }
+            style.addSource(
+                GeoJsonSource(
+                    STOP_SOURCE,
+                    FeatureCollection.fromFeatures(emptyArray())
+                )
+            )
+            style.addLayer(
+                SymbolLayer(
+                    STOP_LAYER,
+                    STOP_SOURCE
+                ).withProperties(
+                    iconImage(STOP_ICON),
+                    iconAllowOverlap(true),
+                    iconIgnorePlacement(true)
+                )
+            )
+        }
+    }
+
+    private fun getBitmapFromVectorDrawable(context: Context, drawableId: Int): Bitmap? {
+        val drawable = ContextCompat.getDrawable(context, drawableId) ?: return null
+        if (drawable is BitmapDrawable) {
+            return drawable.bitmap
+        }
+        val bitmap = createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight)
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+        return bitmap
     }
 
     private fun showGpsMarker(

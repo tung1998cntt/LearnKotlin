@@ -333,7 +333,7 @@ class HomeRepositoryImpl @Inject constructor(
     override suspend fun getStops():ApiResult<List<BusStop>> {
         return when (
             val result = safeApiCallNotBase {
-                apiService.getStops()
+                planApiService.getStops()
             }
         ) {
             is ApiResult.Success ->

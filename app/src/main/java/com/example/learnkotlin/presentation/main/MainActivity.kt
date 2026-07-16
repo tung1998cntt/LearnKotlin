@@ -40,6 +40,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             binding.bottomNavigation,
             applyNavigationBar = true
         )
+        viewModel.login()
     }
 
     override fun handleEvent(event: Event) {
