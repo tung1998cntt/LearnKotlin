@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
+import android.os.Bundle
 import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
@@ -767,7 +768,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 val stopId = selectedFeature?.getStringProperty("id")
                 val selectedStop = viewModel.state.value.busStopsMap[stopId]
                 viewModel.busStop = selectedStop
-                popupBinding.tvDistance.text =  viewModel.busStop?.name ?: "1.2km"
+                popupBinding.tvDistance.text = "1.2km"
                 showBusStopPopup(feature)
                 return@addOnMapClickListener true
             }
@@ -830,9 +831,9 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         y: Float
     ) {
         val popup = binding.layoutBusStopInfo.root
-
-        popup.translationX = x - popup.width / 2f
-        popup.translationY = y - popup.height - 16.dpToPx(requireContext())
+        // Cộng thêm vị trí của mapView để popup hiển thị đúng trên marker
+        popup.translationX = binding.mapView.x + x - popup.width / 2f
+        popup.translationY = binding.mapView.y + y - popup.height - 16.dpToPx(requireContext())
     }
 
     private fun initMarkerLayers() {
@@ -888,7 +889,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
 
         // Selected Stop Layer
         if (style.getSource(SELECTED_STOP_SOURCE) == null) {
-            getBitmapFromVectorDrawable(requireContext(), R.drawable.ic_marker_selected)?.let {
+            getBitmapFromVectorDrawable(requireContext(), R.drawable.ic_location_42)?.let {
                 style.addImage(SELECTED_STOP_ICON, it)
             }
             style.addSource(
