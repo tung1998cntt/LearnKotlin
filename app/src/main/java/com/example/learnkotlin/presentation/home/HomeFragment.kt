@@ -11,6 +11,7 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.ListPopupWindow
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -49,6 +50,14 @@ import org.maplibre.geojson.Feature
 import org.maplibre.geojson.FeatureCollection
 import org.maplibre.geojson.Point
 import androidx.core.graphics.createBitmap
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.learnkotlin.domain.model.home.RouteDetailItem
+import com.example.learnkotlin.domain.model.home.RouteStop
+import com.example.learnkotlin.domain.model.home.SegmentType
+import com.example.learnkotlin.domain.model.home.Variant
+import com.example.learnkotlin.presentation.main.MainActivity
+import com.example.learnkotlin.presentation.route.RouteDetailAdapter
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 
 @AndroidEntryPoint
 class HomeFragment : BaseFragment<FragmentHomeBinding>() {
@@ -75,6 +84,74 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     private val popupBinding by lazy {
         LayoutBusStopInfoBinding.bind(binding.layoutBusStopInfo.root)
     }
+
+    private val detailAdapter by lazy {
+
+        RouteDetailAdapter(
+
+            object : RouteDetailAdapter.Listener {
+
+                override fun onOutboundClick() {
+
+                    sendCommand(
+
+                        HomeCommand.ChangeVariant(
+                            Variant.OUTBOUND
+                        )
+                    )
+                }
+
+                override fun onInboundClick() {
+
+                    sendCommand(
+
+                        HomeCommand.ChangeVariant(
+                            Variant.INBOUND
+                        )
+                    )
+                }
+
+                override fun onRouteInformationClick() {
+
+                    sendCommand(
+
+                        HomeCommand.ChangeSegment(
+                            SegmentType.ROUTE_INFORMATION
+                        )
+                    )
+                }
+
+                override fun onBusStopClick() {
+
+                    sendCommand(
+
+                        HomeCommand.ChangeSegment(
+                            SegmentType.BUS_STOP
+                        )
+                    )
+                }
+
+                override fun onStopClick(stop: RouteStop) {
+
+                }
+            }
+        )
+    }
+
+    private val adapterArrival = NearbyArrivalAdapter(
+        object : NearbyArrivalAdapter.Listener {
+
+            override fun onArrivalClick(item: NearbyArrivalItem) {
+                bottomSheetBehaviorRoute.state =
+                    BottomSheetBehavior.STATE_HIDDEN
+                viewModel.nearbyArrivalItem = item
+                sendCommand(HomeCommand.GetRouteDetail(item.routeId))
+            }
+        }
+    )
+
+    private lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
+    private lateinit var bottomSheetBehaviorRoute: BottomSheetBehavior<LinearLayout>
 
     private val locationCallback = object : LocationCallback() {
 
@@ -223,6 +300,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     ) = FragmentHomeBinding.inflate(inflater, container, false)
 
     override fun onInit() {
+        initBottomSheet()
         initData()
         initMap()
         initView()
@@ -230,6 +308,28 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         initAction()
         observeState()
         viewModel.getBusStops()
+    }
+
+    private fun initBottomSheet() {
+        bottomSheetBehavior = BottomSheetBehavior.from(binding.layoutBottomSheet)
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        bottomSheetBehavior.skipCollapsed = true
+        bottomSheetBehavior.isHideable = true
+        bottomSheetBehavior.peekHeight = 0
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        binding.layoutBottomSheet.translationZ = 100f
+        binding.layoutBottomSheetRoute.translationZ = 100f
+        bottomSheetBehaviorRoute = BottomSheetBehavior.from(binding.layoutBottomSheetRoute)
+        bottomSheetBehaviorRoute.state = BottomSheetBehavior.STATE_HIDDEN
+        bottomSheetBehaviorRoute.skipCollapsed = true
+        bottomSheetBehaviorRoute.isHideable = true
+        bottomSheetBehaviorRoute.state = BottomSheetBehavior.STATE_HIDDEN
+        bottomSheetBehaviorRoute.peekHeight = 0
+        binding.layoutBottomSheetRoute.requestLayout()
+    }
+
+    private fun setBottomNavVisible(show: Boolean) {
+        (activity as? MainActivity)?.showBottomNavigation(show)
     }
 
     private fun initData() {
@@ -249,13 +349,13 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             !viewModel.state.value.selectedCurrentLocation?.name.isNullOrBlank(),
             !viewModel.state.value.selectedDestination?.name.isNullOrBlank(),
         )
-
-        popupBinding.ivClose.setSafeOnClick {
-            binding.layoutBusStopInfo.root.isVisible = false
+        binding.rvRouteDetail.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = detailAdapter
         }
-
-        popupBinding.lnTrackBuses.setSafeOnClick {
-
+        binding.rvRouteDetailRoute.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = adapterArrival
         }
 
     }
@@ -335,6 +435,14 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             updateBusStopMarkers(busStops)
         }
 
+        collectState<HomeState, List<RouteDetailItem>>(
+            selector = {
+                it.detailItems
+            }
+        ) {
+            detailAdapter.submitList(it)
+        }
+
     }
 
     private fun updateBusStopMarkers(busStops: List<BusStop>) {
@@ -397,6 +505,98 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                     viewModel.state.value.selectedDestination
                 )
             )
+        }
+
+        binding.imgClose.setSafeOnClick {
+            bottomSheetBehavior.state =
+                BottomSheetBehavior.STATE_HIDDEN
+        }
+
+        binding.imgCloseRoute.setSafeOnClick {
+            bottomSheetBehaviorRoute.state =
+                BottomSheetBehavior.STATE_HIDDEN
+        }
+
+        bottomSheetBehavior.addBottomSheetCallback(
+            object : BottomSheetBehavior.BottomSheetCallback() {
+
+                override fun onStateChanged(bottomSheet: View, newState: Int) {
+
+                    when (newState) {
+                        BottomSheetBehavior.STATE_EXPANDED, BottomSheetBehavior.STATE_HALF_EXPANDED -> {
+                            binding.viewScrim.visibility = View.VISIBLE
+                            setBottomNavVisible(false)
+                        }
+
+                        BottomSheetBehavior.STATE_HIDDEN -> {
+                            binding.viewScrim.visibility = View.GONE
+                            setBottomNavVisible(true)
+                        }
+                    }
+                }
+
+                override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                    binding.viewScrim.alpha = slideOffset.coerceIn(0f, 1f)
+                }
+            }
+        )
+
+        bottomSheetBehaviorRoute.addBottomSheetCallback(
+            object : BottomSheetBehavior.BottomSheetCallback() {
+
+                override fun onStateChanged(bottomSheet: View, newState: Int) {
+                    when (newState) {
+                        BottomSheetBehavior.STATE_EXPANDED, BottomSheetBehavior.STATE_HALF_EXPANDED -> {
+                            binding.viewScrim.visibility = View.VISIBLE
+                            setBottomNavVisible(false)
+                        }
+
+                        BottomSheetBehavior.STATE_HIDDEN -> {
+                            selectedFeature = null
+                            binding.viewScrim.visibility = View.GONE
+                            setBottomNavVisible(true)
+                        }
+                    }
+                }
+
+                override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                    binding.viewScrim.alpha = slideOffset.coerceIn(0f, 1f)
+                }
+            }
+        )
+
+
+        binding.viewScrim.setOnClickListener {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+            bottomSheetBehaviorRoute.state = BottomSheetBehavior.STATE_HIDDEN
+        }
+
+        popupBinding.ivClose.setSafeOnClick {
+            selectedFeature = null
+            binding.layoutBusStopInfo.root.isVisible = false
+        }
+
+        popupBinding.lnTrackBuses.setSafeOnClick {
+            popupBinding.root.isVisible = false
+            val id = viewModel.busStop?.routes?.firstOrNull()?.routeId?.substringAfter(":")
+            adapterArrival.submitList(viewModel.busStop?.routes?.map {
+                NearbyArrivalItem(
+                    routeId = id ?: "",
+                    routeName = it.shortName ?: "",
+                    plate = "PA-1208",
+                    etaTime = "10:57",
+                    etaMinutes = 11
+                )
+            })
+            binding.tvArrivingAt.text = viewModel.busStop?.name ?: ""
+            // 2. Đợi layout đo đạc xong rồi mới mở BottomSheet
+            // 2. Mở BottomSheet một cách ổn định
+            binding.layoutBottomSheetRoute.post {
+                bottomSheetBehaviorRoute.peekHeight = 0
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                bottomSheetBehaviorRoute.state = BottomSheetBehavior.STATE_EXPANDED
+                binding.layoutBottomSheetRoute.requestLayout()
+            }
         }
 
     }
@@ -517,6 +717,10 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             if (features.isNotEmpty()) {
                 val feature = features[0]
                 selectedFeature = feature
+                val stopId = selectedFeature?.getStringProperty("id")
+                val selectedStop = viewModel.state.value.busStopsMap[stopId]
+                viewModel.busStop = selectedStop
+                popupBinding.tvDistance.text =  viewModel.busStop?.name ?: "1.2km"
                 showBusStopPopup(feature)
                 return@addOnMapClickListener true
             }
@@ -715,6 +919,21 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 )
             }
 
+            is HomeEvent.OpenRouteDetail -> {
+                val detail =
+                    viewModel.state.value.routeDetail ?: return
+                binding.tvRouteName.text =
+                    detail.routeName
+                binding.tvFrequency.isVisible = false
+                binding.tvDestination.text = getString(
+                    R.string.plate_and_eta,
+                    viewModel.nearbyArrivalItem?.plate,
+                    viewModel.nearbyArrivalItem?.etaTime
+                )
+                bottomSheetBehavior.state =
+                    BottomSheetBehavior.STATE_EXPANDED
+            }
+
             else -> { /* To do*/
             }
         }
@@ -749,11 +968,13 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     override fun onStart() {
         super.onStart()
         binding.mapView.onStart()
+        detailAdapter.onStart()
     }
 
     override fun onResume() {
         super.onResume()
         binding.mapView.onResume()
+        detailAdapter.onResume()
         if (::map.isInitialized && hasLocationPermission()) {
             getCurrentLocation()
         }
@@ -767,17 +988,20 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
 
     override fun onStop() {
         binding.mapView.onStop()
+        detailAdapter.onPause()
         super.onStop()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
         binding.mapView.onLowMemory()
+        detailAdapter.onLowMemory()
     }
 
     override fun onDestroyView() {
         fusedClient.removeLocationUpdates(locationCallback)
         binding.mapView.onDestroy()
+        detailAdapter.onDestroy()
         super.onDestroyView()
 
     }

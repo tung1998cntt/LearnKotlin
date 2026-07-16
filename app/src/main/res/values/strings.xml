@@ -66,4 +66,5 @@
     <string name="eta_s">ETA %s</string>
     <string name="plate_and_eta">Plate %s ● ETA %s</string>
     <string name="track_buses">Track buses</string>
+    <string name="buses_arriving_at">Buses arriving at</string>
 </resources>

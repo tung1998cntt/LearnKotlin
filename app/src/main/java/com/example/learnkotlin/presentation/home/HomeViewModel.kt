@@ -1,12 +1,17 @@
 package com.example.learnkotlin.presentation.home
 
 import androidx.lifecycle.viewModelScope
+import com.example.learnkotlin.R
 import com.example.learnkotlin.core.network.ApiResult
 import com.example.learnkotlin.domain.base.Command
 import com.example.learnkotlin.domain.base.Event
+import com.example.learnkotlin.domain.model.home.BusStop
 import com.example.learnkotlin.domain.model.home.LoginRequest
 import com.example.learnkotlin.domain.model.home.NearbyArrivalRequest
+import com.example.learnkotlin.domain.model.home.RouteDetail
+import com.example.learnkotlin.domain.model.home.RouteDetailItem
 import com.example.learnkotlin.domain.model.home.RoutePlanRequest
+import com.example.learnkotlin.domain.model.home.RouteStop
 import com.example.learnkotlin.domain.model.home.SearchLocation
 import com.example.learnkotlin.domain.model.home.SegmentType
 import com.example.learnkotlin.domain.model.home.Variant
@@ -17,6 +22,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.collections.lastIndex
+import kotlin.collections.orEmpty
 import kotlin.collections.plus
 
 @HiltViewModel
@@ -26,6 +33,9 @@ class HomeViewModel @Inject constructor(
 
     private var currentSearchJob: Job? = null
     private var destinationSearchJob: Job? = null
+
+    var busStop: BusStop? = null
+    var nearbyArrivalItem: NearbyArrivalItem? = null
 
     private companion object {
         const val SEARCH_DEBOUNCE = 300L
@@ -123,8 +133,125 @@ class HomeViewModel @Inject constructor(
                 getSuggestRoutes(current, destination)
             }
 
+            is HomeCommand.GetRouteDetail -> {
+
+                getRouteDetail(
+                    command.routeId ?: "",
+                    command.variant
+                )
+
+            }
+
+            is HomeCommand.ChangeVariant -> {
+                updateState {
+                    copy(
+                        variant = command.variant
+                    )
+                }
+                val detail = state.value.routeDetail ?: return
+                getRouteDetail(
+                    id = detail.id ?: "",
+                    variant = if (command.variant == Variant.OUTBOUND)
+                        "outbound"
+                    else
+                        "inbound"
+                )
+            }
+
+            is HomeCommand.ChangeSegment -> {
+                updateState {
+                    copy(
+                        segment = command.segment
+                    )
+                }
+                refreshDetailItems()
+            }
+
+
             else -> super.handleCommand(command)
         }
+    }
+
+    private fun getRouteDetail(
+        id:String,
+        variant:String
+    ){
+
+        launchWithLoading(
+            showLoading = true,
+            block = {
+                when(
+                    val result = homeUseCase.getRouteDetail(
+                        id,
+                        variant
+                    )
+                ){
+                    is ApiResult.Success ->{
+                        updateState {
+                            copy(
+                                routeDetail = result.data,
+                                variant =
+                                    if (variant == "outbound")
+                                        Variant.OUTBOUND
+                                    else
+                                        Variant.INBOUND,
+                                segment = SegmentType.ROUTE_INFORMATION
+                            )
+                        }
+                        refreshDetailItems()
+                        sendEvent(HomeEvent.OpenRouteDetail)
+                    }
+                    is ApiResult.Error ->{
+
+                    }
+                }
+            }
+        )
+    }
+
+
+    private fun refreshDetailItems() {
+        val detail = state.value.routeDetail ?: return
+        updateState {
+            copy(
+                detailItems = buildDetailItems(
+                    response = detail
+                )
+            )
+        }
+    }
+
+    private fun buildDetailItems(
+        response: RouteDetail,
+    ): List<RouteDetailItem> {
+        val allStops: List<RouteStop> = buildList {
+            addAll(response.outboundStops.orEmpty())
+            addAll(response.inboundStops.orEmpty())
+        }
+        val items = mutableListOf<RouteDetailItem>()
+
+        // 3. Map
+        items += RouteDetailItem.Map(
+            points = allStops.flatMap { it.pathPoints ?: listOf() },
+            stops = allStops
+        )
+        allStops.forEachIndexed { index, stop ->
+
+            items += RouteDetailItem.Stop(
+
+                stop = stop,
+
+                // API chưa có khoảng cách
+                distanceText = "+0.6km",
+
+                isFirst = index == 0,
+
+                isLast = index == allStops.lastIndex
+            )
+        }
+        return items
+
+
     }
 
 
@@ -269,8 +396,12 @@ class HomeViewModel @Inject constructor(
             block = {
                 when (val result = homeUseCase.getBusStops()) {
                     is ApiResult.Success -> {
+                        val stops = result.data
                         updateState {
-                            copy(busStops = result.data.orEmpty())
+                            copy(
+                                busStops = result.data,
+                                // Tạo map để tìm kiếm O(1) theo gtfsId
+                                busStopsMap = stops.associateBy { it.gtfsId.orEmpty() })
                         }
                     }
 

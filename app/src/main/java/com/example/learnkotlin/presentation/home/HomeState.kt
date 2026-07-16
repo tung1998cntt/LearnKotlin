@@ -19,7 +19,8 @@ data class HomeState(
     // Bus Stops
     //========================
     val busStops: List<BusStop> = emptyList(),
-
+    // Thêm trường này để lookup nhanh
+    val busStopsMap: Map<String, BusStop> = emptyMap(),
 
     //========================
     // Route Detail

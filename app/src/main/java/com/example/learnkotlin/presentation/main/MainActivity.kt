@@ -2,8 +2,10 @@ package com.example.learnkotlin.presentation.main
 
 import androidx.activity.addCallback
 import androidx.activity.viewModels
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
+import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import com.example.learnkotlin.R
 import com.example.learnkotlin.databinding.ActivityMainBinding
 import com.example.learnkotlin.domain.base.Event
@@ -45,6 +47,24 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     override fun handleEvent(event: Event) {
 
+    }
+
+    private var isBottomNavVisible = true
+
+    fun showBottomNavigation(show: Boolean) {
+        if (show == isBottomNavVisible) return
+        isBottomNavVisible = show
+
+        binding.bottomNavigation.animate().cancel()
+
+        binding.bottomNavigation.animate()
+            .translationY(
+                if (show) 0f
+                else binding.bottomNavigation.height.toFloat()
+            )
+            .setInterpolator(FastOutSlowInInterpolator())
+            .setDuration(250)
+            .start()
     }
 
     private fun setupBottomNavigation() {

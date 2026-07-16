@@ -2,6 +2,7 @@ package com.example.learnkotlin.presentation.home
 
 import com.example.learnkotlin.domain.base.Command
 import com.example.learnkotlin.domain.model.home.Area
+import com.example.learnkotlin.domain.model.home.BusStopRoute
 import com.example.learnkotlin.domain.model.home.LocationSearch
 import com.example.learnkotlin.domain.model.home.NearbyArrivalResponse
 import com.example.learnkotlin.domain.model.home.SearchLocation
