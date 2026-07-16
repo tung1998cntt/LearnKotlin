@@ -30,6 +30,7 @@
 
         <activity android:name=".presentation.ui.user.UserDetailActivity"/>
         <activity android:name=".presentation.home.SearchResultActivity"/>
+        <activity android:name=".presentation.notification.NotificationActivity"/>
 
     </application>
 

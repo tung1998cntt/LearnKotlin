@@ -56,6 +56,7 @@ import com.example.learnkotlin.domain.model.home.RouteStop
 import com.example.learnkotlin.domain.model.home.SegmentType
 import com.example.learnkotlin.domain.model.home.Variant
 import com.example.learnkotlin.presentation.main.MainActivity
+import com.example.learnkotlin.presentation.notification.NotificationActivity
 import com.example.learnkotlin.presentation.route.RouteDetailAdapter
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 
@@ -600,7 +601,10 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         }
 
         binding.ctNotification.setSafeOnClick {
-            /* Sang activity NotificationActivity*/
+            startActivity(
+                NotificationActivity::class.java,
+                null
+            )
         }
 
     }
