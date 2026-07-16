@@ -311,14 +311,18 @@ class RouteViewModel @Inject constructor(
         offset = 0
         getRoute(
             isLoadMore = false,
-            keyword = state.value.searchKeyword
+            keyword = state.value.searchKeyword,
+            showLoading = true
         )
     }
 
     private fun loadRoute() {
         offset = 0
-        getRoute(false,
-            keyword = state.value.searchKeyword)
+        getRoute(
+            false,
+            keyword = state.value.searchKeyword,
+            showLoading = true
+        )
 
     }
 
@@ -333,7 +337,8 @@ class RouteViewModel @Inject constructor(
         }
         offset += limit
         getRoute(true,
-            keyword = state.value.searchKeyword
+            keyword = state.value.searchKeyword,
+            showLoading = false
             )
     }
 
@@ -347,17 +352,19 @@ class RouteViewModel @Inject constructor(
             offset = 0
             getRoute(
                 isLoadMore = false,
-                keyword = keyword
+                keyword = keyword,
+                showLoading = true
             )
         }
     }
 
     private fun getRoute(
         isLoadMore: Boolean,
-        keyword: String? = null
+        keyword: String? = null,
+        showLoading: Boolean = false
     ) {
         launchWithLoading(
-            showLoading = true,
+            showLoading = showLoading,
             block = {
                 when (val result = homeUseCase.getRouteList(
                     RouteListRequest(
