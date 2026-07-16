@@ -190,6 +190,10 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
 
         bottomSheetBehavior = BottomSheetBehavior.from(binding.layoutBottomSheet)
 
+        val height = (resources.displayMetrics.heightPixels * 0.85f).toInt()
+
+        binding.layoutBottomSheet.layoutParams.height = height
+
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
 
         bottomSheetBehavior.skipCollapsed = true

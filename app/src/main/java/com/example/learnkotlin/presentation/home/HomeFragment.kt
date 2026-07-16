@@ -889,7 +889,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
 
         // Selected Stop Layer
         if (style.getSource(SELECTED_STOP_SOURCE) == null) {
-            getBitmapFromVectorDrawable(requireContext(), R.drawable.ic_location_42)?.let {
+            getBitmapFromVectorDrawable(requireContext(), R.drawable.ic_marker_selected)?.let {
                 style.addImage(SELECTED_STOP_ICON, it)
             }
             style.addSource(
