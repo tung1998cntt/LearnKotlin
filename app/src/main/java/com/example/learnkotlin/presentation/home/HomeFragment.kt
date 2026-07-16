@@ -16,6 +16,7 @@ import android.widget.ListPopupWindow
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import com.example.learnkotlin.BuildConfig
 import com.example.learnkotlin.R
@@ -133,21 +134,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 }
 
                 override fun onStopClick(stop: RouteStop) {
-                    if (::popupCurrentLocation.isInitialized) popupCurrentLocation.dismiss()
-                    if (::popupDestination.isInitialized) popupDestination.dismiss()
-                    binding.layoutBusStopInfo.root.isVisible = false
-                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-                    bottomSheetBehaviorRoute.state = BottomSheetBehavior.STATE_HIDDEN
-
-                    if (::map.isInitialized) {
-                        showSelectedStopMarker(stop.latitude, stop.longitude)
-                        map.animateCamera(
-                            CameraUpdateFactory.newLatLngZoom(
-                                LatLng(stop.latitude, stop.longitude),
-                                16.0
-                            )
-                        )
-                    }
+                    handleStopSelection(stop.latitude, stop.longitude)
                 }
             }
         )
@@ -326,8 +313,37 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         initView()
         initPopup()
         initAction()
+        initResultListener()
         observeState()
         viewModel.getBusStops()
+    }
+
+    private fun initResultListener() {
+        setFragmentResultListener("STOP_CLICK_RESULT") { _, bundle ->
+            val lat = bundle.getDouble("lat")
+            val lng = bundle.getDouble("lng")
+            handleStopSelection(lat, lng)
+        }
+    }
+
+    private fun handleStopSelection(lat: Double?, lng: Double?) {
+        if (lat == null || lng == null) return
+
+        if (::popupCurrentLocation.isInitialized) popupCurrentLocation.dismiss()
+        if (::popupDestination.isInitialized) popupDestination.dismiss()
+        binding.layoutBusStopInfo.root.isVisible = false
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        bottomSheetBehaviorRoute.state = BottomSheetBehavior.STATE_HIDDEN
+
+        if (::map.isInitialized) {
+            showSelectedStopMarker(lat, lng)
+            map.animateCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    LatLng(lat, lng),
+                    16.0
+                )
+            )
+        }
     }
 
     private fun initBottomSheet() {
@@ -524,7 +540,11 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                     viewModel.state.value.selectedCurrentLocation,
                     viewModel.state.value.selectedDestination
                 )
-            )
+            ) { resultData ->
+                (resultData as? SearchLocation)?.let {
+                    handleStopSelection(it.latitude, it.longitude)
+                }
+            }
         }
 
         binding.imgClose.setSafeOnClick {
@@ -868,7 +888,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
 
         // Selected Stop Layer
         if (style.getSource(SELECTED_STOP_SOURCE) == null) {
-            getBitmapFromVectorDrawable(requireContext(), R.drawable.ic_location_42)?.let {
+            getBitmapFromVectorDrawable(requireContext(), R.drawable.ic_marker_selected)?.let {
                 style.addImage(SELECTED_STOP_ICON, it)
             }
             style.addSource(
@@ -976,7 +996,11 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 startActivity(
                     clazz = SearchResultActivity::class.java,
                     data = event.data
-                )
+                ) { resultData ->
+                    (resultData as? SearchLocation)?.let {
+                        handleStopSelection(it.latitude, it.longitude)
+                    }
+                }
             }
 
             is HomeEvent.OpenRouteDetail -> {

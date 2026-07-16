@@ -98,6 +98,9 @@ class RouteFragment : BaseFragment<FragmentRouteBinding>() {
                 }
 
                 override fun onStopClick(stop: RouteStop) {
+                    if (::bottomSheetBehavior.isInitialized) {
+                        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                    }
                     val bundle = Bundle().apply {
                         putDouble("lat", stop.latitude)
                         putDouble("lng", stop.longitude)
@@ -129,7 +132,7 @@ class RouteFragment : BaseFragment<FragmentRouteBinding>() {
     }
 
     private fun initAction() {
-        binding.sbSearchRoute.setOnTextChangedListener {text ->
+        binding.sbSearchRoute.setOnTextChangedListener { text ->
             sendCommand(
                 HomeCommand.SearchRoute(
                     text

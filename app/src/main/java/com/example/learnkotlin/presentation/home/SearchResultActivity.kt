@@ -1,5 +1,6 @@
 package com.example.learnkotlin.presentation.home
 
+import android.content.Intent
 import android.graphics.Typeface
 import android.text.SpannableString
 import android.text.Spanned
@@ -23,10 +24,8 @@ import com.example.learnkotlin.domain.model.home.SearchLocation
 import com.example.learnkotlin.domain.model.home.SegmentType
 import com.example.learnkotlin.domain.model.home.Variant
 import com.example.learnkotlin.presentation.base.BaseActivity
-import com.example.learnkotlin.presentation.base.UiEvent
 import com.example.learnkotlin.presentation.base.baseDropdown.BaseDropdownAdapter
 import com.example.learnkotlin.presentation.route.RouteDetailAdapter
-import com.example.learnkotlin.presentation.route.RouteState
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -110,7 +109,19 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
                 }
 
                 override fun onStopClick(stop: RouteStop) {
-
+                    if (::bottomSheetBehavior.isInitialized) {
+                        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                    }
+                    val resultData = SearchLocation(
+                        name = stop.stopName,
+                        latitude = stop.latitude,
+                        longitude = stop.longitude
+                    )
+                    val resultIntent = Intent().apply {
+                        putExtra("data", resultData)
+                    }
+                    setResult(RESULT_OK, resultIntent)
+                    finish()
                 }
             }
         )
@@ -178,10 +189,6 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
     private fun initBottomSheet() {
 
         bottomSheetBehavior = BottomSheetBehavior.from(binding.layoutBottomSheet)
-
-        val height = (resources.displayMetrics.heightPixels * 0.85f).toInt()
-
-        binding.layoutBottomSheet.layoutParams.height = height
 
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
 
@@ -470,58 +477,25 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
                 if (event.data?.listNearbyArrivalItem.isNullOrEmpty()) {
                     binding.tvEmptyView.isVisible = true
                     binding.tvEmptyView.text = getString(R.string.no_buses_found)
-                    binding.tvArrivingYourStop.isVisible = false
-                    binding.rvSuggestedRoutes.isVisible = false
-                    binding.rvArrivingBuses.isVisible = false
                 } else {
                     binding.tvEmptyView.isVisible = false
-                    binding.rvSuggestedRoutes.isVisible = false
-                    binding.rvArrivingBuses.isVisible = true
-                    binding.tvArrivingYourStop.isVisible = true
                     adapterArrival.submitList(event.data.listNearbyArrivalItem)
                 }
             }
 
-
-            is UiEvent.Error -> {
-                showConfirmDialog(title = event.message, onConfirm = {})
-            }
-
             is HomeEvent.OpenRouteDetail -> {
-                if (viewModel.tabRoute == TabRoute.SUGGEST) {
-                    val detail =
-                        viewModel.state.value.routeDetail ?: return
-                    binding.tvFrequency.isVisible = true
-                    binding.tvRouteName.text =
-                        detail.routeName
-                    binding.tvFrequency.text =
-                        "Every 15 min"
-                    binding.tvDestination.text = getString(
-                        R.string.start_end_route,
-                        viewModel.suggestData?.fromAddress,
-                        viewModel.suggestData?.toAddress
-                    )
-                    bottomSheetBehavior.state =
-                        BottomSheetBehavior.STATE_EXPANDED
+                val detail = viewModel.state.value.routeDetail ?: return
+                binding.tvRouteName.text = detail.routeName
+                binding.tvFrequency.isVisible = false
+                binding.tvDestination.text = if (viewModel.tabRoute == TabRoute.SUGGEST) {
+                    getString(R.string.start_end_route, detail.outboundStops?.firstOrNull()?.stopName, detail.outboundStops?.lastOrNull()?.stopName)
                 } else {
-                    val detail =
-                        viewModel.state.value.routeDetail ?: return
-                    binding.tvRouteName.text =
-                        detail.routeName
-                    binding.tvFrequency.isVisible = false
-                    binding.tvDestination.text = getString(
-                        R.string.plate_and_eta,
-                        viewModel.nearbyArrivalData?.plate,
-                        viewModel.nearbyArrivalData?.etaTime
-                    )
-                    bottomSheetBehavior.state =
-                        BottomSheetBehavior.STATE_EXPANDED
+                    getString(R.string.plate_and_eta, viewModel.nearbyArrivalData?.plate, viewModel.nearbyArrivalData?.etaTime)
                 }
-
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
             }
 
-            else -> { /* To do*/
-            }
+            else -> {}
         }
     }
 
@@ -550,31 +524,4 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
     private fun getTextCurrentLocation(location: SearchLocation?): String {
         return location?.name.orEmpty()
     }
-
-
-    override fun onStart() {
-        super.onStart()
-        detailAdapter.onStart()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        detailAdapter.onResume()
-    }
-
-    override fun onPause() {
-        detailAdapter.onPause()
-        super.onPause()
-    }
-
-    override fun onStop() {
-        detailAdapter.onStop()
-        super.onStop()
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        detailAdapter.onLowMemory()
-    }
-
 }
