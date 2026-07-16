@@ -23,6 +23,14 @@ data class HomeState(
     val busStopsMap: Map<String, BusStop> = emptyMap(),
 
     //========================
+    // Nearby Arrivals
+    //========================
+    val listNearbyArrivalItem: List<NearbyArrivalItem> = emptyList(),
+    val nearbyArrivalPage: Int = 1,
+    val isNearbyArrivalLastPage: Boolean = false,
+    val isLoadingMoreNearby: Boolean = false,
+
+    //========================
     // Route Detail
     //========================
 

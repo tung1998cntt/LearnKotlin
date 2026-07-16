@@ -11,6 +11,7 @@ import android.widget.ListPopupWindow
 import androidx.activity.viewModels
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.learnkotlin.R
 import com.example.learnkotlin.core.extensions.setSafeOnClick
 import com.example.learnkotlin.databinding.ActivitySearchResultBinding
@@ -177,6 +178,18 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
         binding.rvArrivingBuses.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = this@SearchResultActivity.adapterArrival
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    val layoutManager = recyclerView.layoutManager as? LinearLayoutManager
+                    val lastVisibleItemPosition = layoutManager?.findLastVisibleItemPosition() ?: 0
+                    val totalItemCount = layoutManager?.itemCount ?: 0
+
+                    if (lastVisibleItemPosition >= totalItemCount - 5) {
+                        sendCommand(HomeCommand.LoadMore)
+                    }
+                }
+            })
         }
 
         binding.rvRouteDetail.apply {

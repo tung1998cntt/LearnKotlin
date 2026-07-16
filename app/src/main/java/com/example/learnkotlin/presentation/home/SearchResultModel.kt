@@ -21,6 +21,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import kotlin.collections.lastIndex
 
@@ -147,11 +150,18 @@ class SearchResultModel @Inject constructor(
             is HomeCommand.GetNearbyRoutes -> {
                 val from = command.locationSearch?.selectedCurrentLocation
                 if (from != null) {
-                    getNearbyArrivals(from)
+                    getNearbyArrivals(from, isLoadMore = false)
                 }
             }
 
-
+            is HomeCommand.LoadMore -> {
+                if (tabRoute == TabRoute.ARRIVING) {
+                    val from = state.value.selectedCurrentLocation
+                    if (from != null && !state.value.isNearbyArrivalLastPage && !state.value.isLoadingMoreNearby) {
+                        getNearbyArrivals(from, isLoadMore = true)
+                    }
+                }
+            }
 
             is HomeCommand.GetRouteDetail -> {
 
@@ -266,28 +276,50 @@ class SearchResultModel @Inject constructor(
         )
     }
 
-    private fun getNearbyArrivals(selectedCurrentLocation: SearchLocation? = null) {
+    private fun getNearbyArrivals(selectedCurrentLocation: SearchLocation? = null, isLoadMore: Boolean = false) {
+        if (isLoadMore) {
+            updateState { copy(isLoadingMoreNearby = true) }
+        }
         launchWithLoading(
-            showLoading = true,
+            showLoading = !isLoadMore,
             block = {
+                val currentPage = if (isLoadMore) state.value.nearbyArrivalPage + 1 else 1
+                // Format time as UTC-3: 2026-07-16T08:35:12-03:00
+                val time = OffsetDateTime.now(ZoneOffset.ofHours(-3))
+                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+
                 val request = NearbyArrivalRequest(
                     lat = selectedCurrentLocation?.latitude ?: 0.0,
                     lon = selectedCurrentLocation?.longitude ?: 0.0,
                     radiusMeters = 2000,
-                    limit = 30
+                    limit = 30,
+                    page = currentPage,
+                    time = time
                 )
-//                val request = NearbyArrivalRequest(
-//                    lat = 5.824683700032168,
-//                    lon = -55.154445192050275,
-//                    radiusMeters = 2000,
-//                    limit = 30
-//                )
-                when (val result =  homeUseCase.getNearbyArrivals(request)) {
+
+                when (val result = homeUseCase.getNearbyArrivals(request)) {
                     is ApiResult.Success -> {
-                        sendEvent(HomeEvent.GetNearbyArrivalsSuccess(result.data))
+                        val newItems = result.data.listNearbyArrivalItem ?: emptyList()
+                        val hasNext = result.data.pagination?.hasNext ?: false
+                        
+                        updateState {
+                            val updatedList = if (isLoadMore) {
+                                listNearbyArrivalItem + newItems
+                            } else {
+                                newItems
+                            }
+                            copy(
+                                listNearbyArrivalItem = updatedList,
+                                nearbyArrivalPage = currentPage,
+                                isNearbyArrivalLastPage = !hasNext,
+                                isLoadingMoreNearby = false
+                            )
+                        }
+                        sendEvent(HomeEvent.GetNearbyArrivalsSuccess(result.data.copy(listNearbyArrivalItem = state.value.listNearbyArrivalItem)))
                     }
 
                     is ApiResult.Error -> {
+                        updateState { copy(isLoadingMoreNearby = false) }
                         sendEvent(
                             HomeEvent.ShowError(
                                 result.message ?: "Unknown error"

@@ -4,5 +4,7 @@ data class NearbyArrivalRequest(
     val lat: Double,
     val lon: Double,
     val radiusMeters: Int,
-    val limit: Int
+    val limit: Int,
+    val time: String? = null,
+    val page: Int? = null
 )

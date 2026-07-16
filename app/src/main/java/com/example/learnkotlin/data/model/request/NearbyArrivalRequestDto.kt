@@ -13,5 +13,11 @@ data class NearbyArrivalRequestDto(
     val radiusMeters: Int,
 
     @SerializedName("limit")
-    val limit: Int
+    val limit: Int,
+
+    @SerializedName("time")
+    val time: String? = null,
+
+    @SerializedName("page")
+    val page: Int? = null
 )

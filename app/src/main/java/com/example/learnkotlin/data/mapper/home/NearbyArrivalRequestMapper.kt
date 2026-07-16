@@ -14,7 +14,9 @@ class NearbyArrivalRequestMapper @Inject constructor() :
             lat = input.lat,
             lon = input.lon,
             radiusMeters = input.radiusMeters,
-            limit = input.limit
+            limit = input.limit,
+            time = input.time,
+            page = input.page
         )
     }
 }
