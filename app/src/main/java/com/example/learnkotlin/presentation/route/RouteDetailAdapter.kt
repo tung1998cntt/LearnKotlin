@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.annotation.DrawableRes
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
@@ -43,6 +42,7 @@ import org.maplibre.android.style.layers.PropertyFactory.lineCap
 import org.maplibre.android.style.layers.PropertyFactory.lineColor
 import org.maplibre.android.style.layers.PropertyFactory.lineJoin
 import org.maplibre.android.style.layers.PropertyFactory.lineWidth
+import org.maplibre.android.style.layers.PropertyFactory.visibility
 import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.geojson.Feature
@@ -233,7 +233,7 @@ class RouteDetailAdapter(
 
             is RouteDetailItem.Map ->
 
-                (holder as MapViewHolder).bind(item)
+                (holder as MapViewHolder).bind(item, flowRoute)
 
             is RouteDetailItem.Segment ->
 
@@ -291,7 +291,7 @@ class RouteDetailAdapter(
     }
 
 
-    class MapViewHolder(
+    inner class MapViewHolder(
         val binding: ItemRouteMapBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
@@ -317,7 +317,7 @@ class RouteDetailAdapter(
             }
         }
 
-        fun bind(item: RouteDetailItem.Map) {
+        fun bind(item: RouteDetailItem.Map, flowRoute: FlowRoute) {
 
             if (!mapCreated) {
 
@@ -351,6 +351,8 @@ class RouteDetailAdapter(
             drawRoute(style, item)
             addStartMarker(style, item)
             addEndMarker(style, item)
+            if (flowRoute == FlowRoute.ARRIVING_BUSES && flowRoute == FlowRoute.TRACK_BUSES)
+                addBusMarker(style)
             moveCamera(map, item)
         }
 
@@ -425,6 +427,24 @@ class RouteDetailAdapter(
             )
         }
 
+        private fun addBusMarker(style: Style) {
+            val currentBusStop = currentList.filterIsInstance<RouteDetailItem.Stop>()
+                .find { it.isCurrentBusStop }
+
+            if (currentBusStop == null) {
+                style.getLayer("bus-layer")?.setProperties(visibility(Property.NONE))
+                return
+            }
+
+            addMarker(
+                style = style,
+                id = "bus",
+                latitude = currentBusStop.stop.latitude,
+                longitude = currentBusStop.stop.longitude,
+                drawable = R.drawable.ic_bus_location
+            )
+        }
+
         private fun addMarker(
             style: Style,
             id: String,
@@ -461,12 +481,14 @@ class RouteDetailAdapter(
                     ).withProperties(
                         iconImage(id),
                         iconAllowOverlap(true),
-                        iconIgnorePlacement(true)
+                        iconIgnorePlacement(true),
+                        visibility(Property.VISIBLE)
                     )
                 )
             } else {
                 // Chỉ cập nhật vị trí marker
                 source.setGeoJson(feature)
+                style.getLayer("${id}-layer")?.setProperties(visibility(Property.VISIBLE))
             }
         }
 
