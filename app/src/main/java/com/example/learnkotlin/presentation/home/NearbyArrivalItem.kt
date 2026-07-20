@@ -8,7 +8,7 @@ import kotlinx.parcelize.Parcelize
 data class NearbyArrivalItem(
     val routeId: String,
     val routeName: String,
-    val plate: String,
-    val etaTime: String,
+    val plate: String? = null,
+    val etaTime: String? = null,
     val etaMinutes: Int
 ) : Parcelable, NavData

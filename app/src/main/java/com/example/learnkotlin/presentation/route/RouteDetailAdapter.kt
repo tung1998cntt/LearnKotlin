@@ -1,6 +1,8 @@
 package com.example.learnkotlin.presentation.route
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -46,6 +48,7 @@ import org.maplibre.android.style.layers.PropertyFactory.visibility
 import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.geojson.Feature
+import org.maplibre.geojson.FeatureCollection
 import org.maplibre.geojson.LineString
 import org.maplibre.geojson.Point
 
@@ -318,6 +321,8 @@ class RouteDetailAdapter(
         }
 
         fun bind(item: RouteDetailItem.Map, flowRoute: FlowRoute) {
+            binding.tvTapOn.isVisible =
+                flowRoute != FlowRoute.ARRIVING_BUSES && flowRoute != FlowRoute.TRACK_BUSES
 
             if (!mapCreated) {
 
@@ -349,10 +354,12 @@ class RouteDetailAdapter(
             item: RouteDetailItem.Map
         ) {
             drawRoute(style, item)
-            addStartMarker(style, item)
+            if (flowRoute == FlowRoute.ARRIVING_BUSES || flowRoute == FlowRoute.TRACK_BUSES)
+            addStopMarkers(style, item)
             addEndMarker(style, item)
-            if (flowRoute == FlowRoute.ARRIVING_BUSES && flowRoute == FlowRoute.TRACK_BUSES)
+            if (flowRoute == FlowRoute.ARRIVING_BUSES || flowRoute == FlowRoute.TRACK_BUSES)
                 addBusMarker(style)
+            addStartMarker(style, item)
             moveCamera(map, item)
         }
 
@@ -445,6 +452,50 @@ class RouteDetailAdapter(
             )
         }
 
+        private fun addStopMarkers(style: Style, item: RouteDetailItem.Map) {
+            if (item.stops.isEmpty()) return
+
+            val features = item.stops.map { stop ->
+                Feature.fromGeometry(Point.fromLngLat(stop.longitude, stop.latitude))
+            }
+
+            val sourceId = "stops-source"
+            val layerId = "stops-layer"
+            val imageId = "stop-icon"
+
+            val source = style.getSourceAs<GeoJsonSource>(sourceId)
+            if (source == null) {
+                val bitmap = getBitmap(R.drawable.ic_stop_gray)
+                if (bitmap != null && style.getImage(imageId) == null) {
+                    style.addImage(imageId, bitmap)
+                }
+
+                style.addSource(GeoJsonSource(sourceId, FeatureCollection.fromFeatures(features)))
+                style.addLayer(
+                    SymbolLayer(layerId, sourceId).withProperties(
+                        iconImage(imageId),
+                        iconAllowOverlap(true),
+                        iconIgnorePlacement(true)
+                    )
+                )
+            } else {
+                source.setGeoJson(FeatureCollection.fromFeatures(features))
+            }
+        }
+
+        private fun getBitmap(@DrawableRes drawableId: Int): Bitmap? {
+            val drawable = ContextCompat.getDrawable(binding.root.context, drawableId) ?: return null
+            val bitmap = Bitmap.createBitmap(
+                drawable.intrinsicWidth.coerceAtLeast(1),
+                drawable.intrinsicHeight.coerceAtLeast(1),
+                Bitmap.Config.ARGB_8888
+            )
+            val canvas = Canvas(bitmap)
+            drawable.setBounds(0, 0, canvas.width, canvas.height)
+            drawable.draw(canvas)
+            return bitmap
+        }
+
         private fun addMarker(
             style: Style,
             id: String,
@@ -462,11 +513,10 @@ class RouteDetailAdapter(
             val source = style.getSourceAs<GeoJsonSource>("${id}-source")
             if (source == null) {
                 if (style.getImage(id) == null) {
-                    val bitmap = BitmapFactory.decodeResource(
-                        binding.root.resources,
-                        drawable
-                    )
-                    style.addImage(id, bitmap)
+                    val bitmap = getBitmap(drawable)
+                    if (bitmap != null) {
+                        style.addImage(id, bitmap)
+                    }
                 }
                 style.addSource(
                     GeoJsonSource(
@@ -647,9 +697,7 @@ class RouteDetailAdapter(
                     binding.viewTopBlue.isVisible = true
                     binding.imgBus.isVisible = true
                     binding.imgPoint.isVisible = false
-
                     binding.tvName.setTextColor(ContextCompat.getColor(binding.root.context, R.color.color_EE0033))
-                    binding.tvName.text = binding.root.context.getString(R.string.bus_is_here_now)
                 }
 
                 item.isPassed -> {
@@ -659,7 +707,6 @@ class RouteDetailAdapter(
                     binding.imgPoint.isVisible = true
                     binding.imgPoint.setImageResource(R.drawable.ic_blue_point_27)
                     binding.tvName.setTextColor(ContextCompat.getColor(binding.root.context, R.color.color_4B4B4B))
-                    binding.tvName.text = item.stop.stopName
                 }
 
                 else -> {
@@ -669,7 +716,6 @@ class RouteDetailAdapter(
                     binding.imgPoint.isVisible = true
 
                     binding.tvName.setTextColor(ContextCompat.getColor(binding.root.context, R.color.color_4B4B4B))
-                    binding.tvName.text = item.stop.stopName
                 }
             }
             binding.viewTopGray.isVisible = !item.isFirst

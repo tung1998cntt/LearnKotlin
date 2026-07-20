@@ -50,7 +50,9 @@ data class BusStopRoute(
 
     val textColor: String? = null,
 
-    val routeId: String? = null
+    val routeId: String? = null,
+    val etaTime: String? = null,
+    val licensePlate: String? = null,
 ): Parcelable, NavData
 
 

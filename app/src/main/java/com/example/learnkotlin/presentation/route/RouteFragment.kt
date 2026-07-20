@@ -306,18 +306,11 @@ class RouteFragment : BaseFragment<FragmentRouteBinding>() {
                     detail.routeName
                 binding.tvFrequency.text =
                     "Every 15 min"
-                binding.tvDestination.text =
-                    if (viewModel.state.value.variant == Variant.OUTBOUND)
-                        requireContext().getString(
-                            R.string.start_end_route,
-                            detail.outboundStops?.firstOrNull()?.stopName,
-                            detail.outboundStops?.lastOrNull()?.stopName
-                        )
-                    else requireContext().getString(
-                        R.string.start_end_route,
-                        detail.inboundStops?.firstOrNull()?.stopName,
-                        detail.inboundStops?.lastOrNull()?.stopName
-                    )
+                binding.tvDestination.text = requireContext().getString(
+                    R.string.start_end_route,
+                    detail.outboundStops?.firstOrNull()?.stopName,
+                    detail.outboundStops?.lastOrNull()?.stopName
+                )
 
                 bottomSheetBehavior.state =
                     BottomSheetBehavior.STATE_EXPANDED

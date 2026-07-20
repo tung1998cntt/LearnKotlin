@@ -164,7 +164,6 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
         binding.tvArrivingYourStop.text = spannable
     }
     private fun initView() {
-        setArrivingYourStop(binding.sbDestination.getText())
         displayViewWithTab()
         binding.lnFindRoute.setEnabledWithAlpha(
             !viewModel.state.value.selectedCurrentLocation?.name.isNullOrBlank(),
@@ -230,6 +229,7 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
             binding.rvArrivingBuses.isVisible = true
             binding.tvArrivingYourStop.isVisible = true
         }
+        setArrivingYourStop(binding.sbDestination.getText())
     }
 
     private fun observeState() {
@@ -512,7 +512,7 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
             is HomeEvent.OpenRouteDetail -> {
                 val detail = viewModel.state.value.routeDetail ?: return
                 binding.tvRouteName.text = detail.routeName
-                binding.tvFrequency.isVisible = false
+                binding.tvFrequency.isVisible = viewModel.tabRoute == TabRoute.SUGGEST
                 binding.tvDestination.text = if (viewModel.tabRoute == TabRoute.SUGGEST) {
                     getString(R.string.start_end_route, detail.outboundStops?.firstOrNull()?.stopName, detail.outboundStops?.lastOrNull()?.stopName)
                 } else {

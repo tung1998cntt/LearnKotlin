@@ -14,6 +14,8 @@ import com.example.learnkotlin.domain.model.home.Pagination
 import com.example.learnkotlin.domain.model.home.Stop
 import com.example.learnkotlin.domain.model.home.Vehicle
 import com.example.learnkotlin.presentation.home.NearbyArrivalItem
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 class NearbyArrivalMapper @Inject constructor() :
@@ -30,19 +32,30 @@ class NearbyArrivalMapper @Inject constructor() :
         )
     }
 
+    private val mockStartTime = LocalTime.of(10, 57)
+    private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     fun NearbyArrivalResponseDto.toItems(): List<NearbyArrivalItem> {
 
-        return stops.flatMap { stop ->
+        return stops.flatMapIndexed  { stopIndex, stop ->
 
-            stop.arrivals.map { arrival ->
+            stop.arrivals.mapIndexed { index, arrival ->
 
                 val vehicle = arrival.vehicles.firstOrNull()
 
                 NearbyArrivalItem(
                     routeId = arrival.routeId.substringAfter(":"),
                     routeName = stop.stopName,
-                    plate = vehicle?.licensePlate.orEmpty(),
-                    etaTime = vehicle?.etaTime?.toHourMinute() ?: "",       // 19:10
+                    plate = vehicle?.licensePlate
+                        ?.takeIf { it.isNotBlank() }
+                        ?: "PA-${1200 + stopIndex}",
+
+                    etaTime = vehicle?.etaTime
+                        ?.toHourMinute()
+                        ?.takeIf { it.isNotBlank() }
+                        ?: mockStartTime
+                            .plusMinutes(stopIndex * 5L)
+                            .format(timeFormatter),
+
                     etaMinutes = arrival.minutesToArrival
                 )
             }

@@ -5,8 +5,13 @@ import com.example.learnkotlin.domain.model.home.BusStop
 
 object StopMapper {
 
-    fun map(dto: BusStopDto): BusStop {
+    fun map(list: List<BusStopDto>): List<BusStop> {
+        return list.mapIndexed { stopIndex, dto ->
+            map(dto, stopIndex)
+        }
+    }
 
+    private fun map(dto: BusStopDto, stopIndex: Int): BusStop {
         return BusStop(
             gtfsId = dto.gtfsId,
             name = dto.name,
@@ -20,11 +25,9 @@ object StopMapper {
             vehicleMode = dto.vehicleMode,
             wheelchairBoarding = dto.wheelchairBoarding,
             parentStation = ParentStationMapper.map(dto.parentStation),
-            routes = dto.routes?.map(BusStopRouteMapper::map)
+            routes = dto.routes?.map {
+                BusStopRouteMapper.map(it, stopIndex)
+            }
         )
-    }
-
-    fun map(list: List<BusStopDto>): List<BusStop> {
-        return list.map(::map)
     }
 }

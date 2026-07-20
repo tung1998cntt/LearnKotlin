@@ -70,7 +70,17 @@ data class RouteDto(
     val textColor: String? = null,
 
     @SerializedName("routeId")
-    val routeId: String? = null
+    val routeId: String? = null,
+    @SerializedName("vehicles")
+    val vehicles: List<VehiclesInfo>? = null
+)
+
+data class VehiclesInfo(
+
+    @SerializedName("etaTime")
+    val etaTime: String? = null,
+    @SerializedName("licensePlate")
+    val licensePlate: String? = null,
 )
 
 data class ParentStationDto(

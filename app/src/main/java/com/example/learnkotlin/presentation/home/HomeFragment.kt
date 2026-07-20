@@ -625,8 +625,8 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 NearbyArrivalItem(
                     routeId = id ?: "",
                     routeName = it.shortName ?: "",
-                    plate = "PA-1208",
-                    etaTime = "10:57",
+                    plate = it.licensePlate ?: "PA-1208",
+                    etaTime = it.etaTime ?:  "10:57",
                     etaMinutes = 11
                 )
             })

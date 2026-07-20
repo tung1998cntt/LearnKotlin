@@ -262,6 +262,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Route L1"
+                    android:maxLines="2"
+                    android:ellipsize="end"
                     android:textColor="@color/color_001737"
                     android:textSize="@dimen/dimen_15sp"
                     android:textStyle="bold" />
