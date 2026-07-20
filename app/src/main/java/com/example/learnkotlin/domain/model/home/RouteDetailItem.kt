@@ -72,7 +72,11 @@ sealed class RouteDetailItem {
 
         val isFirst: Boolean,
 
-        val isLast: Boolean
+        val isLast: Boolean,
+
+        val isPassed: Boolean = false,
+        val isCurrentBusStop: Boolean = false,
+        var currentStopIndex: Int = 3
 
     ) : RouteDetailItem()
 }

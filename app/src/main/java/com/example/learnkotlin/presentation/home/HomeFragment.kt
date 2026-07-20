@@ -388,6 +388,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         )
         binding.rvRouteDetail.apply {
             layoutManager = LinearLayoutManager(context)
+            detailAdapter.setFlowRoute(FlowRoute.TRACK_BUSES)
             adapter = detailAdapter
         }
         binding.rvRouteDetailRoute.apply {

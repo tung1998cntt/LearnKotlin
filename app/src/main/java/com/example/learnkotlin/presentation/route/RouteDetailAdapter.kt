@@ -6,7 +6,11 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.annotation.DrawableRes
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -24,6 +28,7 @@ import com.example.learnkotlin.domain.model.home.RouteStop
 import com.example.learnkotlin.domain.model.home.SegmentType
 import com.example.learnkotlin.domain.model.home.Variant
 import com.example.learnkotlin.presentation.base.customview.VerticalDashDrawable
+import com.example.learnkotlin.presentation.home.FlowRoute
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
@@ -50,6 +55,8 @@ class RouteDetailAdapter(
 
 
     private var mapHolder: MapViewHolder? = null
+
+    private var flowRoute = FlowRoute.TRACK_BUSES
 
     interface Listener {
 
@@ -123,6 +130,10 @@ class RouteDetailAdapter(
 
         }
 
+    }
+
+    fun setFlowRoute(flowRoute: FlowRoute) {
+        this.flowRoute = flowRoute
     }
 
     override fun onCreateViewHolder(
@@ -234,7 +245,7 @@ class RouteDetailAdapter(
 
             is RouteDetailItem.Stop ->
 
-                (holder as StopViewHolder).bind(item)
+                (holder as StopViewHolder).bind(item, flowRoute)
 
         }
 
@@ -249,10 +260,14 @@ class RouteDetailAdapter(
 
             binding.tvFare.text = item.fare
 
+            item.distance.apply {
+                binding.tvDistance.text = this
+            }
             binding.tvDistance.text = item.distance
 
             binding.tvStops.text = binding.root.context.getString(R.string.number_stop, item.stopCount.toString())
         }
+
     }
 
     class DirectionViewHolder(
@@ -570,11 +585,11 @@ class RouteDetailAdapter(
             binding.viewTop.background = dashDrawable
             binding.viewBottom.background = dashDrawable
         }
-        fun bind(item: RouteDetailItem.Stop) {
+        fun bind(item: RouteDetailItem.Stop, flowRoute: FlowRoute) {
 
             binding.tvName.text = item.stop.stopName
-
-            binding.tvDistance.text = item.distanceText ?: ""
+            binding.tvDistance.text = item.distanceText ?: "1.2 km"
+            binding.imgArrow.isVisible = flowRoute != FlowRoute.ARRIVING_BUSES && flowRoute != FlowRoute.TRACK_BUSES
 
             binding.viewTop.visibility =
                 if (item.isFirst) View.INVISIBLE else View.VISIBLE
@@ -582,7 +597,7 @@ class RouteDetailAdapter(
             binding.viewBottom.visibility =
                 if (item.isLast) View.INVISIBLE else View.VISIBLE
 
-            val lp = binding.imgPoint.layoutParams
+            val lp = binding.imgPoint.layoutParams as FrameLayout.LayoutParams
             when {
                 item.isFirst -> {
                     binding.imgPoint.setImageResource(R.drawable.ic_blue_point_27)
@@ -602,10 +617,47 @@ class RouteDetailAdapter(
                     lp.height = dp(27)
                 }
             }
-
             binding.imgPoint.layoutParams = lp
+
+
+            when {
+                item.isCurrentBusStop -> {
+                    binding.viewTopBlue.isVisible = true
+                    binding.imgBus.isVisible = true
+                    binding.imgPoint.isVisible = false
+
+                    binding.tvName.setTextColor(ContextCompat.getColor(binding.root.context, R.color.color_EE0033))
+                    binding.tvName.text = binding.root.context.getString(R.string.bus_is_here_now)
+                }
+
+                item.isPassed -> {
+                    binding.viewTopBlue.isVisible = true
+                    binding.viewBottomBlue.isVisible = true
+                    binding.imgBus.isVisible = false
+                    binding.imgPoint.isVisible = true
+                    binding.imgPoint.setImageResource(R.drawable.ic_blue_point_27)
+                    binding.tvName.setTextColor(ContextCompat.getColor(binding.root.context, R.color.color_4B4B4B))
+                    binding.tvName.text = item.stop.stopName
+                }
+
+                else -> {
+                    binding.viewTopBlue.isVisible = false
+                    binding.viewBottomBlue.isVisible = false
+                    binding.imgBus.isVisible = false
+                    binding.imgPoint.isVisible = true
+
+                    binding.tvName.setTextColor(ContextCompat.getColor(binding.root.context, R.color.color_4B4B4B))
+                    binding.tvName.text = item.stop.stopName
+                }
+            }
+            binding.viewTopGray.isVisible = !item.isFirst
+            binding.viewTopBlue.isVisible = binding.viewTopBlue.isVisible && !item.isFirst
+            binding.viewBottomGray.isVisible = !item.isLast
+            binding.viewBottomBlue.isVisible = binding.viewBottomBlue.isVisible && !item.isLast
+
             binding.root.setSafeOnClick {
-                listener.onStopClick(item.stop)
+                if (flowRoute != FlowRoute.ARRIVING_BUSES && flowRoute != FlowRoute.TRACK_BUSES)
+                    listener.onStopClick(item.stop)
             }
         }
 

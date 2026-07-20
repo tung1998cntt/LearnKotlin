@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/dimen_60dp">
+    android:layout_height="wrap_content"
+    android:minHeight="60dp">
 
     <!-- line trên -->
 
@@ -11,11 +13,11 @@
         android:id="@+id/viewTop"
         android:layout_width="2dp"
         android:layout_height="0dp"
-        android:layout_marginBottom="2dp"
+        android:background="@drawable/bg_vertical_dash"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/lnPoint"
-        app:layout_constraintStart_toStartOf="@id/lnPoint"
-        app:layout_constraintEnd_toEndOf="@id/lnPoint"/>
+        app:layout_constraintBottom_toTopOf="@id/flPoint"
+        app:layout_constraintStart_toStartOf="@id/flPoint"
+        app:layout_constraintEnd_toEndOf="@id/flPoint"/>
 
     <!-- line dưới -->
 
@@ -23,69 +25,122 @@
         android:id="@+id/viewBottom"
         android:layout_width="2dp"
         android:layout_height="0dp"
-        android:layout_marginTop="2dp"
-        app:layout_constraintTop_toBottomOf="@id/lnPoint"
+        android:background="@drawable/bg_vertical_dash"
+        app:layout_constraintTop_toBottomOf="@id/flPoint"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="@id/lnPoint"
-        app:layout_constraintEnd_toEndOf="@id/lnPoint"/>
+        app:layout_constraintStart_toStartOf="@id/flPoint"
+        app:layout_constraintEnd_toEndOf="@id/flPoint"/>
 
-    <LinearLayout
-        android:id="@+id/lnPoint"
-        android:layout_width="@dimen/dimen_49dp"
-        android:layout_height="@dimen/dimen_53dp"
-        android:orientation="vertical"
-        android:gravity="center"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+    <FrameLayout
+        android:id="@+id/flPoint"
+        android:layout_width="49dp"
+        android:layout_marginTop="@dimen/dimen_16dp"
+        android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
-        >
+        app:layout_constraintStart_toStartOf="parent">
+
         <ImageView
             android:id="@+id/imgPoint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:contentDescription="@null"
             android:src="@drawable/ic_stop_gray"
-            />
+            android:layout_gravity="center"/>
+    </FrameLayout>
 
-    </LinearLayout>
+    <FrameLayout
+        android:layout_width="2dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/flPoint"
+        app:layout_constraintStart_toStartOf="@id/flPoint"
+        app:layout_constraintEnd_toEndOf="@id/flPoint">
+
+        <View
+            android:id="@+id/viewTopGray"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_vertical_dash"/>
+
+        <View
+            android:id="@+id/viewTopBlue"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/color_0573EC"
+            android:visibility="gone"/>
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:layout_width="2dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/flPoint"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@id/flPoint"
+        app:layout_constraintEnd_toEndOf="@id/flPoint">
+
+        <View
+            android:id="@+id/viewBottomGray"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_vertical_dash"/>
+
+        <View
+            android:id="@+id/viewBottomBlue"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/color_0573EC"
+            android:visibility="gone"/>
+
+    </FrameLayout>
+
+    <ImageView
+        android:id="@+id/imgBus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_bus_location"
+        android:visibility="visible"
+        android:contentDescription="@null"
+        app:layout_constraintTop_toTopOf="@id/flPoint"
+        app:layout_constraintStart_toStartOf="@id/flPoint" />
 
     <LinearLayout
+        android:id="@+id/layoutContent"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
+
+
         android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="@id/lnPoint"
-        app:layout_constraintEnd_toStartOf="@id/imgArrow"
-        app:layout_constraintStart_toEndOf="@id/lnPoint"
-        app:layout_constraintTop_toTopOf="@id/lnPoint">
+        app:layout_constraintTop_toTopOf="@id/flPoint"
+        app:layout_constraintStart_toEndOf="@id/flPoint"
+        app:layout_constraintEnd_toStartOf="@id/imgArrow">
 
         <TextView
             android:id="@+id/tvName"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/color_4B4B4B"
-            android:textSize="@dimen/dimen_15sp"
-            android:textStyle="bold" />
+            android:textSize="15sp"
+            android:textStyle="bold"/>
 
         <TextView
             android:id="@+id/tvDistance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dimen_4dp"
+            android:layout_marginTop="4dp"
             android:textColor="@color/color_7A7A7A"
-            android:textSize="@dimen/dimen_13sp" />
+            android:textSize="13sp"/>
 
     </LinearLayout>
 
     <ImageView
         android:id="@+id/imgArrow"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="20dp"
         android:contentDescription="@null"
-        android:layout_marginEnd="@dimen/dimen_20dp"
         android:src="@drawable/ic_next_24"
-        app:layout_constraintBottom_toBottomOf="@id/lnPoint"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/lnPoint" />
+        app:layout_constraintTop_toTopOf="@id/flPoint"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -195,6 +195,9 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
         binding.rvRouteDetail.apply {
             layoutManager =
                 LinearLayoutManager(this@SearchResultActivity)
+            val flow =
+                if (viewModel.tabRoute == TabRoute.SUGGEST) FlowRoute.SUGGEST_ROUTE else FlowRoute.ARRIVING_BUSES
+            detailAdapter.setFlowRoute(flow)
             adapter = detailAdapter
         }
     }
@@ -294,6 +297,9 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
         binding.segment.setOnTabSelectedListener {
             if (it == 0) {
                 viewModel.tabRoute = TabRoute.SUGGEST
+                val flow =
+                    if (viewModel.tabRoute == TabRoute.SUGGEST) FlowRoute.SUGGEST_ROUTE else FlowRoute.ARRIVING_BUSES
+                detailAdapter.setFlowRoute(flow)
                 sendCommand(HomeCommand.GetSuggestRoutes(
                     LocationSearch(
                         viewModel.state.value.selectedCurrentLocation,
@@ -302,6 +308,9 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>() {
                 ))
             } else {
                 viewModel.tabRoute = TabRoute.ARRIVING
+                val flow =
+                    if (viewModel.tabRoute == TabRoute.SUGGEST) FlowRoute.SUGGEST_ROUTE else FlowRoute.ARRIVING_BUSES
+                detailAdapter.setFlowRoute(flow)
                 sendCommand(HomeCommand.GetNearbyRoutes(
                     LocationSearch(
                         viewModel.state.value.selectedCurrentLocation,

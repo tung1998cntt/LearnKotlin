@@ -489,7 +489,10 @@ class SearchResultModel @Inject constructor(
 
                     isFirst = index == 0,
 
-                    isLast = index == allStops.lastIndex
+                    isLast = index == allStops.lastIndex,
+                    currentStopIndex = 3,
+                    isPassed = index < 3,
+                    isCurrentBusStop = index == 3
                 )
             }
             return items

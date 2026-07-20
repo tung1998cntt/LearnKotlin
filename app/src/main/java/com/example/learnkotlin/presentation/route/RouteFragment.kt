@@ -24,6 +24,7 @@ import com.example.learnkotlin.domain.model.home.SegmentType
 import com.example.learnkotlin.domain.model.home.Variant
 import com.example.learnkotlin.presentation.base.BaseFragment
 import com.example.learnkotlin.presentation.base.UiEvent
+import com.example.learnkotlin.presentation.home.FlowRoute
 import com.example.learnkotlin.presentation.home.HomeCommand
 import com.example.learnkotlin.presentation.home.HomeEvent
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -249,6 +250,7 @@ class RouteFragment : BaseFragment<FragmentRouteBinding>() {
         binding.rvRouteDetail.apply {
             layoutManager =
                 LinearLayoutManager(requireContext())
+            detailAdapter.setFlowRoute(FlowRoute.ROUTE)
             adapter = detailAdapter
         }
         addLoadMore()

@@ -1,12 +1,10 @@
 package com.example.learnkotlin.presentation.home
 
 import androidx.lifecycle.viewModelScope
-import com.example.learnkotlin.R
 import com.example.learnkotlin.core.network.ApiResult
 import com.example.learnkotlin.domain.base.Command
 import com.example.learnkotlin.domain.base.Event
 import com.example.learnkotlin.domain.model.home.BusStop
-import com.example.learnkotlin.domain.model.home.LoginRequest
 import com.example.learnkotlin.domain.model.home.NearbyArrivalRequest
 import com.example.learnkotlin.domain.model.home.RouteDetail
 import com.example.learnkotlin.domain.model.home.RouteDetailItem
@@ -22,9 +20,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.collections.lastIndex
-import kotlin.collections.orEmpty
-import kotlin.collections.plus
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -246,7 +241,10 @@ class HomeViewModel @Inject constructor(
 
                 isFirst = index == 0,
 
-                isLast = index == allStops.lastIndex
+                isLast = index == allStops.lastIndex,
+                currentStopIndex = 3,
+                isPassed = index < 3,
+                isCurrentBusStop = index == 3
             )
         }
         return items
