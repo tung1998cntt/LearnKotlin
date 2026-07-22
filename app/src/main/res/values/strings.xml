@@ -70,4 +70,5 @@
     <string name="notifications_title">Notifications</string>
     <string name="bus_is_here_now">Bus is here now</string>
     <string name="tap_a_stop_to_focus">Tap a stop to focus on the map and track buses</string>
+    <string name="stops_number">%s Stops</string>
 </resources>

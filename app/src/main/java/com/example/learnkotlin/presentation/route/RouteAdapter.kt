@@ -45,12 +45,19 @@ class RouteAdapter(
             binding.tvPrice.text = "SRD 8"
             binding.tvDistance.text = binding.root.context.getString(R.string.km_value, item.outboundDistance)
             binding.tvFrequency.text = binding.root.context.getString(R.string.every_s_min, "15")
-            binding.tvStops.text = "8 Stops"
+            binding.tvStops.text =  binding.root.context.getString(R.string.stops_number, getFakeStops(bindingAdapterPosition))
             binding.tvStartEnd.text = "CHM Building - Hermitageweg"
             binding.tvDetail.setSafeOnClick {
                 onClick(item)
             }
         }
+
+        private fun getFakeStops(position: Int): String {
+            val stops = listOf(24, 17, 14, 13, 12, 11, 9, 12, 10, 10, 13, 12, 3)
+            val count = stops.getOrElse(position) { 8 }
+            return "$count"
+        }
+
     }
 
     class DiffCallback : DiffUtil.ItemCallback<RouteItem>() {

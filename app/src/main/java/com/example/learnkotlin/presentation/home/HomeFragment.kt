@@ -784,22 +784,43 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             true
         }
 
+        map.addOnCameraMoveListener {
+            selectedFeature?.let(::showBusStopPopup)
+        }
+
         map.addOnCameraIdleListener {
             selectedFeature?.let(::showBusStopPopup)
         }
     }
 
     private fun showBusStopPopup(feature: Feature) {
-
         val point = feature.geometry() as Point
+        val latLng = LatLng(point.latitude(), point.longitude())
 
-        val latLng = LatLng(
-            point.latitude(),
-            point.longitude()
-        )
+        // Kiểm tra xem marker có nằm trong vùng nhìn thấy của bản đồ không
+        // Nếu không nằm trong vùng nhìn thấy thì ẩn popup đi
+        val visibleRegion = map.projection.visibleRegion
+        val isMarkerVisible = visibleRegion.latLngBounds.contains(latLng)
+
+        if (!isMarkerVisible) {
+            binding.layoutBusStopInfo.root.isVisible = false
+            return
+        }
 
         val screenPoint = map.projection.toScreenLocation(latLng)
 
+        // Kiểm tra thêm tọa độ màn hình để đảm bảo marker không bị che bởi các thành phần khác 
+        // hoặc nằm ngoài giới hạn vật lý của MapView (đặc biệt khi có margin/padding)
+        val isInsideView = screenPoint.x >= 0 && screenPoint.y >= 0 &&
+                screenPoint.x <= binding.mapView.width &&
+                screenPoint.y <= binding.mapView.height
+
+        if (!isInsideView) {
+            binding.layoutBusStopInfo.root.isVisible = false
+            return
+        }
+
+        // Nếu thỏa mãn các điều kiện thì hiển thị và cập nhật vị trí popup
         showPopupAt(
             screenPoint.x.toFloat(),
             screenPoint.y.toFloat(),
