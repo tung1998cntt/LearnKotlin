@@ -280,7 +280,7 @@ class RouteViewModel @Inject constructor(
                             Area("", "All areas", true),
                             Area("1", "Brokopondo", false),
                             Area("2", "Commenwijne", false),
-                            Area("3", "Commenwijne", false)
+                            Area("3", "Nijmegen", false)
                         )
 
                         updateState {

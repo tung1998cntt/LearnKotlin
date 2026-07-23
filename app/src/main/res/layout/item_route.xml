@@ -114,6 +114,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:maxLines="1"
+                android:ellipsize="end"
                 android:textColor="@color/color_4B4B4B"
                 android:textSize="@dimen/dimen_13sp"
                 tools:text="CHM Building - Hermitageweg" />

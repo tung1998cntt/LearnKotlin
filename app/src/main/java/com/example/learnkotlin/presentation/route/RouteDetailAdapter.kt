@@ -268,7 +268,7 @@ class RouteDetailAdapter(
             }
             binding.tvDistance.text = item.distance
 
-            binding.tvStops.text = binding.root.context.getString(R.string.number_stop, item.stopCount.toString())
+            binding.tvStops.text = item.stopCount.toString()
         }
 
     }

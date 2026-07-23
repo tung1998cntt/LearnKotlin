@@ -46,7 +46,7 @@ class RouteAdapter(
             binding.tvDistance.text = binding.root.context.getString(R.string.km_value, item.outboundDistance)
             binding.tvFrequency.text = binding.root.context.getString(R.string.every_s_min, "15")
             binding.tvStops.text =  binding.root.context.getString(R.string.stops_number, getFakeStops(bindingAdapterPosition))
-            binding.tvStartEnd.text = "CHM Building - Hermitageweg"
+            binding.tvStartEnd.text = getFakeRouteName(bindingAdapterPosition)
             binding.tvDetail.setSafeOnClick {
                 onClick(item)
             }
@@ -56,6 +56,24 @@ class RouteAdapter(
             val stops = listOf(24, 17, 14, 13, 12, 11, 9, 12, 10, 10, 13, 12, 3)
             val count = stops.getOrElse(position) { 8 }
             return "$count"
+        }
+
+        private fun getFakeRouteName(position: Int): String {
+            val stops = listOf("Beginhalte A.L. Waaldijkstaat - troelistraat links",
+                "Beginhalte C.H.M Dr. Sophie Redmondstraat links - Rambali Mathoeraweg links",
+                "Beginhalte Waterkant Plattebrug - Bonistraat rechts",
+                "Beginhalte Heiligenweg - Jozef Israelsstraat rechts",
+                "Beginhalte Steenbakkerijstraat - Androestraat rechts",
+                "Beginhalte Steenbakkerijstraat - Licaniastraat",
+                "Beginhalte C.H.M. Dr. Sophie Redmondstraat - Indira Gandhiweg links",
+                "Beginhalte C.H.M. - Reineweg links",
+                "Beginhalte Waterkant (S.M.S. Veersteiger) rechts - Ringweg links",
+                "Beginhalte Waterkant (Platte Brug) - Anton Dragtenweg - Morgenstondlaan",
+                "Beginhalte Saramaccastraat - Poelepantje links",
+                "Beginhalte C.H.M. - Dr. Sophie Redmondstraat - Brokopondelaan links",
+                "55 Nguyễn Viết Xuân, Hà Đông, Hà Nội - Vật lý trị liệu tại nhà, Hà Đông, Hà Nội")
+            val count = stops.getOrElse(position) { "Beginhalte A.L. Waaldijkstaat - troelistraat links" }
+            return count
         }
 
     }
