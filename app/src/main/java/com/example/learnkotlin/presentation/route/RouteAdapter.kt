@@ -45,35 +45,50 @@ class RouteAdapter(
             binding.tvPrice.text = "SRD 8"
             binding.tvDistance.text = binding.root.context.getString(R.string.km_value, item.outboundDistance)
             binding.tvFrequency.text = binding.root.context.getString(R.string.every_s_min, "15")
-            binding.tvStops.text =  binding.root.context.getString(R.string.stops_number, getFakeStops(bindingAdapterPosition))
-            binding.tvStartEnd.text = getFakeRouteName(bindingAdapterPosition)
+            binding.tvStops.text =  binding.root.context.getString(R.string.stops_number, getFakeStops(item.routeName))
+            binding.tvStartEnd.text = getFakeRouteName(item.routeName)
             binding.tvDetail.setSafeOnClick {
                 onClick(item)
             }
         }
 
-        private fun getFakeStops(position: Int): String {
-            val stops = listOf(24, 17, 14, 13, 12, 11, 9, 12, 10, 10, 13, 12, 3)
-            val count = stops.getOrElse(position) { 8 }
-            return "$count"
+        private fun getFakeStops(name: String?): String {
+            return when (name) {
+                "TAMKAS" -> "24"
+                "Pontbuiten" -> "17"
+                "PG" -> "14"
+                "Lijn_10" -> "13"
+                "Lijn_9" -> "12"
+                "Lijn_8" -> "11"
+                "Lijn_7" -> "9"
+                "Lijn_6" -> "12"
+                "Lijn_5" -> "10"
+                "Lijn_4" -> "10"
+                "Lijn_2" -> "13"
+                "Lijn_1" -> "12"
+                "TUNG1998" -> "3"
+                else -> "8"
+            }
         }
 
-        private fun getFakeRouteName(position: Int): String {
-            val stops = listOf("Beginhalte A.L. Waaldijkstaat - troelistraat links",
-                "Beginhalte C.H.M Dr. Sophie Redmondstraat links - Rambali Mathoeraweg links",
-                "Beginhalte Waterkant Plattebrug - Bonistraat rechts",
-                "Beginhalte Heiligenweg - Jozef Israelsstraat rechts",
-                "Beginhalte Steenbakkerijstraat - Androestraat rechts",
-                "Beginhalte Steenbakkerijstraat - Licaniastraat",
-                "Beginhalte C.H.M. Dr. Sophie Redmondstraat - Indira Gandhiweg links",
-                "Beginhalte C.H.M. - Reineweg links",
-                "Beginhalte Waterkant (S.M.S. Veersteiger) rechts - Ringweg links",
-                "Beginhalte Waterkant (Platte Brug) - Anton Dragtenweg - Morgenstondlaan",
-                "Beginhalte Saramaccastraat - Poelepantje links",
-                "Beginhalte C.H.M. - Dr. Sophie Redmondstraat - Brokopondelaan links",
-                "55 Nguyễn Viết Xuân, Hà Đông, Hà Nội - Vật lý trị liệu tại nhà, Hà Đông, Hà Nội")
-            val count = stops.getOrElse(position) { "Beginhalte A.L. Waaldijkstaat - troelistraat links" }
-            return count
+
+        private fun getFakeRouteName(name: String?): String {
+            return when (name) {
+                "TAMKAS" -> "Beginhalte A.L. Waaldijkstaat - troelistraat links"
+                "Pontbuiten" -> "Beginhalte C.H.M Dr. Sophie Redmondstraat links - Rambali Mathoeraweg links"
+                "PG" -> "Beginhalte Waterkant Plattebrug - Bonistraat rechts"
+                "Lijn_10" -> "Beginhalte Heiligenweg - Jozef Israelsstraat rechts"
+                "Lijn_9" -> "Beginhalte Steenbakkerijstraat - Androestraat rechts"
+                "Lijn_8" -> "Beginhalte Steenbakkerijstraat - Licaniastraat"
+                "Lijn_7" -> "Beginhalte C.H.M. Dr. Sophie Redmondstraat - Indira Gandhiweg links"
+                "Lijn_6" -> "Beginhalte C.H.M. - Reineweg links"
+                "Lijn_5" -> "Beginhalte Waterkant (S.M.S. Veersteiger) rechts - Ringweg links"
+                "Lijn_4" -> "Beginhalte Waterkant (Platte Brug) - Anton Dragtenweg - Morgenstondlaan"
+                "Lijn_2" -> "Beginhalte Saramaccastraat - Poelepantje links"
+                "Lijn_1" -> "Beginhalte C.H.M. - Dr. Sophie Redmondstraat - Brokopondelaan links"
+                "TUNG1998" -> "55 Nguyễn Viết Xuân, Hà Đông, Hà Nội - Vật lý trị liệu tại nhà, Hà Đông, Hà Nội"
+                else -> "Beginhalte A.L. Waaldijkstaat - troelistraat links"
+            }
         }
 
     }
