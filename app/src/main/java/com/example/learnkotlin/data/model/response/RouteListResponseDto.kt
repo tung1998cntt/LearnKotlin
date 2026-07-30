@@ -14,7 +14,7 @@ data class RouteListResponseDto(
     val limit: Int,
 
     @SerializedName("routes")
-    val routes: List<RouteItemDto>
+    val routes: List<RouteItemDto>? = null
 )
 
 data class RouteItemDto(

@@ -224,7 +224,7 @@ class HomeRepositoryImpl @Inject constructor(
             total = total,
             offset = offset,
             limit = limit,
-            routes = routes.map { it.toDomain() }
+            routes = routes?.map { it.toDomain() }
         )
 
     private fun RouteItemDto.toDomain() =
